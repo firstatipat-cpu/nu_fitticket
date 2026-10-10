@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "tickets": {
+      ".read": true,
+      "$code": {
+        ".write": "!data.exists()"
+      }
+    },
+    "slips": {
+      ".read": true,
+      "$ref": {
+        ".write": "!data.exists()"
+      }
+    },
+    "entries": {
+      ".read": true,
+      "$id": {
+        ".write": "!data.exists()"
+      }
+    }
+  }
+}
