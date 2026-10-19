@@ -6,7 +6,7 @@ import '../models/account.dart';
 import '../services/auth_service.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
-import '../widgets/nu_header.dart';
+import '../widget/nu_header.dart';
 import 'register_page.dart';
 import 'staff_dashboard.dart';
 import 'student_home.dart';

@@ -11,6 +11,12 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+AGENTS.md
+handoff.md
+memory.md
+PROJECT_SUMMARY.md
+SPEC.md
+
 
 # IntelliJ related
 *.iml
