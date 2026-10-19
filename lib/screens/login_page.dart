@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         body: Column(
           children: [
             const NUHeader(
-              title: 'NARESUAN\nUNIVERSITY',
+              title: 'NU\nFitTicket',
               subtitle: 'ซื้อตั๋ว NU Fitness ด้วยแอป โชว์ตั๋วเข้าใช้ได้เลย',
             ),
             Expanded(
@@ -181,16 +181,6 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text('สมัครใหม่ด้วยรหัสนิสิต'),
                       ),
                     ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'บัญชีทดสอบ\nstaff01 / test1234  (เจ้าหน้าที่)\n67000001 / test1234  (นิสิต)',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.muted,
-                      height: 1.5,
-                    ),
-                  ),
                 ],
               ),
             ),

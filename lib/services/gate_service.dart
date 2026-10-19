@@ -25,7 +25,7 @@ class GateRejected extends GateResult {
 }
 
 /// R2/R4 — ตรวจตั๋วที่ประตูและบันทึกการเข้าใช้
-/// เจ้าของ: <รหัสนิสิตคนที่ 3>
+/// เจ้าของ: <67314858>
 class GateService {
   GateService._();
 

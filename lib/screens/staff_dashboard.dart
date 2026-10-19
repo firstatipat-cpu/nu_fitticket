@@ -13,7 +13,7 @@ import 'report_page.dart';
 import 'scan_ticket_page.dart';
 
 /// R4 — ภาพรวมวันนี้: ยอดขายตั๋ว + คนที่เข้าใช้ (ไม่ต้องนับเอง)
-/// เจ้าของ: <รหัสนิสิตคนที่ 3>
+/// เจ้าของ: <67314858>
 class StaffDashboardPage extends StatefulWidget {
   const StaffDashboardPage({super.key});
 

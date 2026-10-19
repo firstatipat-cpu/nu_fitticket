@@ -8,7 +8,7 @@ import '../services/gate_service.dart';
 import '../theme/app_theme.dart';
 
 /// R4 — สแกน QR ตั๋ว หรือกรอกรหัสสำรอง แล้วบันทึกการเข้าใช้
-/// เจ้าของ: <รหัสนิสิตคนที่ 3>
+/// เจ้าของ: <67314858>
 class ScanTicketPage extends StatefulWidget {
   const ScanTicketPage({super.key});
 

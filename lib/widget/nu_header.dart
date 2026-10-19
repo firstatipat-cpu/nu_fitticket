@@ -47,7 +47,7 @@ class NUHeader extends StatelessWidget {
                     border: Border.all(color: AppColors.orange, width: 4),
                   ),
                   child: const Icon(
-                    Icons.school,
+                    Icons.confirmation_num,
                     size: 38,
                     color: AppColors.orange,
                   ),

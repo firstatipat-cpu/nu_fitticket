@@ -7,7 +7,7 @@ import '../models/ticket.dart';
 import '../theme/app_theme.dart';
 
 /// ตั๋วที่นิสิตโชว์ให้เจ้าหน้าที่ — มี QR และรหัสสำรองให้กรอกได้
-/// เจ้าของ: <รหัสนิสิตคนที่ 2>
+/// เจ้าของ: <67317088>
 class TicketPage extends StatelessWidget {
   const TicketPage({super.key, required this.ticket});
 
