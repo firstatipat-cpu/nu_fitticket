@@ -52,6 +52,9 @@ flutter build apk --release   # build/app/outputs/flutter-apk/app-release.apk
 
 ติดตั้งด้วยการส่งไฟล์เข้าเครื่องแล้วกดเปิด (อนุญาต "ติดตั้งจากแหล่งที่ไม่รู้จัก") หรือ `adb install app-release.apk`
 
+**ดาวน์โหลดได้เลย (Release):** <https://github.com/firstatipat-cpu/nu_fitticket/releases/download/submit-2569/app-release.apk>
+— 67.3 MB · แพ็กเกจ `com.nu.fitticket` · tag `submit-2569` · ถอนเวอร์ชันเก่า `com.example.nu_fitticket` ออกก่อน (สองแพ็กเกจอยู่พร้อมกันได้)
+
 **คีย์สำหรับ build release** (ไฟล์คีย์ไม่อยู่ในรีโป — ไฟล์ `android/key.properties` + `android/*.jks` ถูก `.gitignore`) สร้างครั้งเดียวแล้วใช้ได้ทุก build:
 
 ```bash
@@ -109,6 +112,9 @@ keytool -genkeypair -v -keystore android/nu-fitticket-release.jks -storetype JKS
 |---|---|---|
 | `staff01` | `test1234` | เจ้าหน้าที่ |
 | `67000001` | `test1234` | นิสิต |
+
+> แอป seed ให้แค่ **บัญชี** — ยังไม่มีตั๋วตั้งต้น นิสิตต้องกดซื้อตั๋วเอง
+> (จะได้ QR พร้อมเพย์ยอด 10.00 บาท ที่ฝังเลขอ้างอิง = รหัสตั๋ว) แล้วแนบสลิปจริงจึงจะได้ตั๋ว
 
 ## เทสต์
 
