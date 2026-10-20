@@ -46,11 +46,15 @@ ThemeData buildAppTheme() {
     ),
     cardTheme: CardThemeData(
       color: Colors.white,
-      elevation: 2,
-      shadowColor: const Color(0x14000000),
+      // คลีนขึ้น: ไม่ใช้เงา ตัดเงาแล้วใช้เส้นบางแทน (ขอบการ์ดบางและนุ่มกว่า)
+      elevation: 0,
+      shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColors.line),
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -65,7 +69,7 @@ ThemeData buildAppTheme() {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.orange,
         minimumSize: const Size.fromHeight(50),
-        side: const BorderSide(color: AppColors.orange, width: 1.4),
+        side: const BorderSide(color: AppColors.line, width: 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
@@ -79,10 +83,11 @@ ThemeData buildAppTheme() {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
-      labelStyle: const TextStyle(color: AppColors.muted),
+      labelStyle: const TextStyle(color: AppColors.muted, fontSize: 14),
       floatingLabelStyle: const TextStyle(
         color: AppColors.orange,
         fontWeight: FontWeight.w600,
+        fontSize: 14,
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
@@ -138,18 +143,50 @@ ThemeData buildAppTheme() {
 
   return theme.copyWith(
     textTheme: theme.textTheme.copyWith(
+      // สเกลตัวอักษร: ตัวเลขใหญ่ ข้อความอ่านสบาย ป้ายกำกับเล็กแต่ไม่จิบ
       headlineMedium: const TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.w800,
+        color: AppColors.ink,
+        letterSpacing: -0.5,
+      ),
+      headlineSmall: const TextStyle(
+        fontSize: 22,
         fontWeight: FontWeight.w800,
         color: AppColors.ink,
       ),
       titleLarge: const TextStyle(
+        fontSize: 20,
         fontWeight: FontWeight.w700,
         color: AppColors.ink,
       ),
       titleMedium: const TextStyle(
+        fontSize: 16,
         fontWeight: FontWeight.w700,
         color: AppColors.ink,
       ),
+      titleSmall: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: AppColors.muted,
+        letterSpacing: 0.2,
+      ),
+      bodyLarge: const TextStyle(
+        fontSize: 16,
+        color: AppColors.ink,
+        height: 1.45,
+      ),
+      bodyMedium: const TextStyle(
+        fontSize: 15,
+        color: AppColors.ink,
+        height: 1.45,
+      ),
+      bodySmall: const TextStyle(
+        fontSize: 13,
+        color: AppColors.muted,
+        height: 1.4,
+      ),
+      labelLarge: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
     ),
   );
 }

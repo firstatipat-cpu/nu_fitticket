@@ -18,15 +18,26 @@ class TicketPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final format = DateFormat('d/M/yyyy HH:mm');
     final expired = ticket.isExpiredAt(DateTime.now());
+    final expiryColor = expired ? AppColors.danger : AppColors.success;
 
     return Scaffold(
       appBar: AppBar(title: const Text('ตั๋วของฉัน')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         children: [
+          // จุดเด่นหนึ่งเดียวของแอป: สถานะการชำระ อ่านออกจากไกล ๆ
+          PaymentStatusBand(
+            paid: ticket.isPaid,
+            detail: ticket.isPaid
+                ? (ticket.bankName == null
+                      ? 'ยืนยันแล้ว${ticket.slipRef == null ? '' : ' · เลขที่ ${ticket.slipRef}'}'
+                      : 'ยืนยันแล้ว · ${ticket.bankName}')
+                : 'ยังไม่ยืนยัน — แนบสลิปการโอนเพื่อใช้งานตั๋วนี้',
+          ),
+          const SizedBox(height: 16),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
                   Row(
@@ -38,51 +49,42 @@ class TicketPage extends StatelessWidget {
                             Text(
                               kFacilityName,
                               style: const TextStyle(
-                                fontSize: 22,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: 2),
-                            const Text(
-                              'ตั๋วถึง 20:00 น.',
-                              style: TextStyle(color: AppColors.muted),
+                            Text(
+                              'ตั๋วใช้ได้ถึง 20:00 น. ของวันที่ซื้อ',
+                              style: const TextStyle(
+                                color: AppColors.muted,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  (expired
-                                          ? AppColors.danger
-                                          : AppColors.success)
-                                      .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              expired ? 'หมดอายุ' : 'ใช้ได้',
-                              style: TextStyle(
-                                color: expired
-                                    ? AppColors.danger
-                                    : AppColors.success,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: expiryColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          expired ? 'หมดอายุ' : 'ใช้ได้',
+                          style: TextStyle(
+                            color: expiryColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
                           ),
-                          const SizedBox(height: 6),
-                          PaymentBadge(paid: ticket.isPaid, compact: true),
-                        ],
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -93,25 +95,26 @@ class TicketPage extends StatelessWidget {
                     child: QrImageView(
                       data: ticket.code,
                       version: QrVersions.auto,
-                      size: 220,
+                      size: 210,
                       backgroundColor: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   const Text(
-                    'รหัสตั๋ว (กรอกสำรองได้)',
-                    style: TextStyle(color: AppColors.muted, fontSize: 12),
+                    'รหัสตั๋ว (ใช้กรอกสำรองได้)',
+                    style: TextStyle(color: AppColors.muted, fontSize: 13),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     ticket.code,
                     style: const TextStyle(
-                      fontSize: 30,
+                      fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 6,
+                      letterSpacing: 8,
+                      height: 1.2,
                     ),
                   ),
-                  const Divider(height: 32),
+                  const Divider(height: 28),
                   _Row(label: 'ชื่อ', value: ticket.studentName),
                   _Row(label: 'รหัสนิสิต', value: ticket.studentId),
                   _Row(
@@ -142,7 +145,7 @@ class TicketPage extends StatelessWidget {
           const Text(
             'โชว์หน้านี้ให้เจ้าหน้าที่ดูก่อนเข้าใช้ — เจ้าหน้าที่จะสแกน QR หรือกรอกรหัสตั๋ว',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.muted, fontSize: 12, height: 1.5),
+            style: TextStyle(color: AppColors.muted, fontSize: 13, height: 1.5),
           ),
         ],
       ),
@@ -159,17 +162,21 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 90,
-            child: Text(label, style: const TextStyle(color: AppColors.muted)),
+            width: 96,
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
             ),
           ),
         ],

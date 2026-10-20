@@ -149,22 +149,46 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          const _Steps(),
+          const SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text(
-                    kFacilityName,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'ตั๋วถึง 20:00 น. · $_amount บาท',
-                    style: const TextStyle(color: AppColors.muted),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              kFacilityName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'ใช้ได้ถึง 20:00 น. ของวันที่ซื้อ',
+                              style: TextStyle(
+                                color: AppColors.muted,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '$_amount บาท',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.orange,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 18),
                   Container(
@@ -184,34 +208,34 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+                  Text(
+                    'สแกนด้วยแอปธนาคารเพื่อโอน $_amount บาท',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'พร้อมเพย์ $kPromptPayId · อ้างอิง $_code',
+                    style: const TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.ios_share),
                     label: const Text('แชร์ QR ให้แอปธนาคาร'),
                     onPressed: _busy ? null : _shareQr,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   const Text(
                     'ถ้าแอปธนาคารของคุณสแกน QR จากรูปได้ ให้แชร์รูปนี้ไปเปิดในแอปธนาคาร '
                     '(ปุ่มเลือกรูปในหน้าสแกน) · ถ้าไม่ได้ ให้ใช้กล้องของอีกเครื่องสแกนหน้าจอนี้',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.muted,
-                      fontSize: 11,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'สแกนด้วยแอปธนาคารเพื่อโอน $_amount บาท',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'พร้อมเพย์ $kPromptPayId · อ้างอิง $_code',
-                    style: const TextStyle(
-                      color: AppColors.muted,
                       fontSize: 12,
+                      height: 1.5,
                     ),
                   ),
                 ],
@@ -293,16 +317,76 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
               _busy ? 'กำลังตรวจสลิป...' : 'แนบสลิปเพื่อยืนยันการโอน',
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           const Text(
-            'วิธีใช้: 1) สแกน QR ด้านบนด้วยแอปธนาคารเพื่อโอนเงิน  2) แคปหน้าสลิปเก็บไว้  '
-            '3) กดปุ่มด้านบนแล้วเลือกภาพสลิปนั้น\n\n'
             'แอปจะตรวจว่าเป็นสลิปโอนของธนาคารจริง ข้อมูลไม่ถูกแก้ (CRC) และเลขที่รายการยังไม่เคยใช้ — '
             'แต่ QR บนสลิปไม่มีจำนวนเงินและผู้รับ จึงยืนยันยอดเงินให้อัตโนมัติไม่ได้',
-            style: TextStyle(color: AppColors.muted, fontSize: 12, height: 1.6),
+            style: TextStyle(
+              color: AppColors.muted,
+              fontSize: 13,
+              height: 1.55,
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// ขั้นตอน 3 ขั้นสั้น ๆ — บอกลำดับก่อนให้ผู้ใช้กดปุ่ม (แทนย่อหน้าวิธีใช้ยาว ๆ)
+class _Steps extends StatelessWidget {
+  const _Steps();
+
+  @override
+  Widget build(BuildContext context) {
+    const steps = ['แชร์ QR', 'จ่ายเงิน', 'แนบสลิป'];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < steps.length; i++) ...[
+          if (i > 0)
+            const Padding(
+              padding: EdgeInsets.only(top: 11),
+              child: Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: AppColors.muted,
+              ),
+            ),
+          Expanded(
+            child: Column(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.orange.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${i + 1}',
+                    style: const TextStyle(
+                      color: AppColors.orange,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  steps[i],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

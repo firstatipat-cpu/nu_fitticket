@@ -270,11 +270,36 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
             ],
           ),
           const SizedBox(height: 12),
-          _StatCard(
-            icon: Icons.report_gmailerrorred,
-            label: 'เดินผ่านประตูโดยยังไม่ชำระ',
-            value: '${data.entriesToday.where((e) => !e.paid).length} คน',
-            highlight: data.entriesToday.any((e) => !e.paid),
+          // คนที่เดินผ่านประตูโดยยังไม่ชำระ = เรื่องที่ต้องตามต่อ → แถบเตือนแบบกระชับ
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.danger.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.person_off, color: AppColors.danger, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'เดินผ่านประตูโดยยังไม่ชำระ',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${data.entriesToday.where((e) => !e.paid).length} คน',
+                  style: const TextStyle(
+                    color: AppColors.danger,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -318,10 +343,16 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
             ),
           ),
           const Divider(height: 32),
-          Text(
+          const Text(
             'รายชื่อที่เข้าใช้วันนี้',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.muted,
+              letterSpacing: 0.2,
+            ),
           ),
+          const SizedBox(height: 4),
           if (data.entriesToday.isEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 8),
@@ -375,20 +406,21 @@ class _StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: accent, size: 22),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(color: AppColors.muted, fontSize: 12),
-            ),
-            const SizedBox(height: 4),
+            Icon(icon, color: accent, size: 20),
+            const SizedBox(height: 10),
             Text(
               value,
               style: TextStyle(
                 color: highlight ? AppColors.danger : AppColors.ink,
-                fontSize: 19,
+                fontSize: 26,
                 fontWeight: FontWeight.w800,
+                height: 1.1,
               ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(color: AppColors.muted, fontSize: 13),
             ),
           ],
         ),

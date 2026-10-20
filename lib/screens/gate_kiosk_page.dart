@@ -118,31 +118,55 @@ class _GateKioskPageState extends State<GateKioskPage> {
           _statusCard(),
           const SizedBox(height: 16),
           ClipRRect(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             child: SizedBox(
-              height: 240,
-              child: MobileScanner(
-                controller: _controller,
-                onDetect: (capture) {
-                  for (final barcode in capture.barcodes) {
-                    final value = barcode.rawValue;
-                    if (value != null && value.trim().isNotEmpty) {
-                      _handle(value);
-                      return;
-                    }
-                  }
-                },
-                errorBuilder: (context, error) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'เปิดกล้องไม่ได้ (${error.errorCode})\n'
-                      'ให้ใช้ช่องกรอกรหัสตั๋วด้านล่างแทน',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.muted),
+              height: 260,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  MobileScanner(
+                    controller: _controller,
+                    onDetect: (capture) {
+                      for (final barcode in capture.barcodes) {
+                        final value = barcode.rawValue;
+                        if (value != null && value.trim().isNotEmpty) {
+                          _handle(value);
+                          return;
+                        }
+                      }
+                    },
+                    errorBuilder: (context, error) => Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'เปิดกล้องไม่ได้ (${error.errorCode})\n'
+                          'ให้ใช้ช่องกรอกรหัสตั๋วด้านล่างแทน',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: AppColors.muted),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  // กรอบเล็งบอกว่าวาง QR ตรงไหน (สำคัญตอนใช้จริงที่ประตู)
+                  IgnorePointer(
+                    child: CustomPaint(painter: _ScanFramePainter()),
+                  ),
+                  const Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 12,
+                    child: Text(
+                      'วาง QR ตั๋วให้อยู่ในกรอบ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        shadows: [Shadow(blurRadius: 8, color: Colors.black54)],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -169,9 +193,11 @@ class _GateKioskPageState extends State<GateKioskPage> {
     return Card(
       color: result == null ? Colors.white : color.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: result == null ? AppColors.line : color.withValues(alpha: 0.4),
+          color: result == null
+              ? AppColors.line
+              : color.withValues(alpha: 0.35),
         ),
       ),
       child: Padding(
@@ -184,7 +210,7 @@ class _GateKioskPageState extends State<GateKioskPage> {
                   : result.ok
                   ? Icons.check_circle
                   : Icons.cancel,
-              size: 64,
+              size: 60,
               color: color,
             ),
             const SizedBox(height: 12),
@@ -192,25 +218,70 @@ class _GateKioskPageState extends State<GateKioskPage> {
               result?.title ?? 'พร้อมสแกน',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 28,
                 fontWeight: FontWeight.w800,
+                height: 1.15,
                 color: color,
               ),
             ),
-            const SizedBox(height: 6),
-            if (result != null && result.detail.isNotEmpty)
+            if (result != null && result.detail.isNotEmpty) ...[
+              const SizedBox(height: 6),
               Text(
                 result.detail,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.muted),
+                style: const TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
               ),
+            ],
             if (result?.paid != null) ...[
-              const SizedBox(height: 10),
-              PaymentBadge(paid: result!.paid!),
+              const SizedBox(height: 12),
+              PaymentBadge(paid: result!.paid!, compact: true),
             ],
           ],
         ),
       ),
     );
   }
+}
+
+/// กรอบมุมสี่ขาแบบสแกนเนอร์ — บอกตำแหน่งที่ควรวาง QR
+class _ScanFramePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    const inset = 28.0;
+    const len = 26.0;
+    final rect = Rect.fromLTWH(
+      inset,
+      inset,
+      size.width - inset * 2,
+      size.height - inset * 2,
+    );
+
+    void corner(Offset start, double dx, double dy) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(start.dx + dx * len, start.dy)
+          ..lineTo(start.dx, start.dy)
+          ..lineTo(start.dx, start.dy + dy * len),
+        paint,
+      );
+    }
+
+    corner(rect.topLeft, 1, 1);
+    corner(rect.topRight, -1, 1);
+    corner(rect.bottomLeft, 1, -1);
+    corner(rect.bottomRight, -1, -1);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -9,6 +9,7 @@ import '../models/ticket.dart';
 import '../services/ticket_service.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
+import '../widget/payment_badge.dart';
 import 'buy_ticket_page.dart';
 import 'history_page.dart';
 import 'login_page.dart';
@@ -115,20 +116,48 @@ class _StudentHomePageState extends State<StudentHomePage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.person),
-                title: Text(
-                  account.name,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+            // แถวผู้ใช้ — ไม่ต้องมีการ์ด ให้เบาลง
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.orange.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person,
+                    color: AppColors.orange,
+                    size: 22,
                   ),
                 ),
-                subtitle: Text(account.login),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        account.login,
+                        style: const TextStyle(
+                          color: AppColors.muted,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             if (_loading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 32),
@@ -154,16 +183,20 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       const Text(
                         'ยังไม่มีตั๋วที่ใช้ได้',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         'ตั๋ว $kFacilityName ราคา ${(kTicketPriceCents / 100).toStringAsFixed(0)} บาท ใช้ได้ถึง 20:00 น.',
-                        style: const TextStyle(color: AppColors.muted),
+                        style: const TextStyle(
+                          color: AppColors.muted,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
                       FilledButton.icon(
                         icon: const Icon(Icons.confirmation_number),
                         label: Text(
@@ -220,82 +253,74 @@ class _ActiveTicketCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final format = DateFormat('d/M/yyyy HH:mm');
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [AppColors.orange, AppColors.orangeDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // จุดเด่นหนึ่งเดียวของแอป: สถานะการชำระ
+        PaymentStatusBand(
+          paid: ticket.isPaid,
+          detail: ticket.isPaid
+              ? 'ใช้ได้ถึง ${format.format(ticket.expiryTime)}'
+              : 'ยังไม่ยืนยัน — แนบสลิปการโอนเพื่อใช้งานตั๋วนี้',
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33F26F21),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.confirmation_number, color: Colors.white),
-              SizedBox(width: 8),
-              Text(
-                'ตั๋วที่ใช้ได้',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        kFacilityName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${ticket.priceBaht.toStringAsFixed(0)} บาท',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            kFacilityName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
+                const SizedBox(height: 10),
+                Text(
+                  ticket.code,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 6,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'ใช้ได้ถึง ${format.format(ticket.expiryTime)}',
+                  style: const TextStyle(color: AppColors.muted, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  icon: const Icon(Icons.qr_code_2),
+                  label: const Text('เปิดตั๋วโชว์เจ้าหน้าที่'),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => TicketPage(ticket: ticket),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'ใช้ได้ถึง ${format.format(ticket.expiryTime)}',
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Icon(
-                ticket.isPaid ? Icons.verified : Icons.error_outline,
-                color: Colors.white,
-                size: 16,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                ticket.isPaid ? 'ชำระแล้ว' : 'ยังไม่ยืนยันการชำระเงิน',
-                style: const TextStyle(color: Colors.white, fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.orangeDark,
-            ),
-            icon: const Icon(Icons.qr_code_2),
-            label: const Text('เปิดตั๋วโชว์เจ้าหน้าที่'),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => TicketPage(ticket: ticket)),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

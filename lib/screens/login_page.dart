@@ -36,6 +36,13 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _loadRemembered();
+    // แก้ข้อความผิดพลาดทิ้งทันทีที่ผู้ใช้เริ่มพิมพ์ใหม่ (ไม่ให้ข้อความเก่าค้างรบกวน)
+    _id.addListener(_clearError);
+    _password.addListener(_clearError);
+  }
+
+  void _clearError() {
+    if (_error != null) setState(() => _error = null);
   }
 
   Future<void> _loadRemembered() async {
