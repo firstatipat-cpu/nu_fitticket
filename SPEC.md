@@ -184,7 +184,7 @@
 
 ## 9. เทสต์และผลตรวจสอบ
 
-**เทสต์อัตโนมัติ 25 รายการ** (`test/unit_test.dart`): แฮชรหัสผ่าน · รหัสตั๋ว · เวลาหมดอายุตั๋ว (20:00 ของวันจ่าย · จ่าย 19:59 · จ่ายหลัง 20:00) · dateKey · CSV · QR พร้อมเพย์ (CRC check 0x29B1, payload ทีละไบต์, tag 01, ความยาวไบต์ UTF-8) · สลิป (สลิปจริง KBank, ค่าอ้างอิง promptparse, ตรวจ CRC) · กันสูตร Excel ทั้งชื่อและรหัสนิสิต (ค่าจากคลาวด์ปลอมได้)
+**เทสต์อัตโนมัติ 41 รายการ** (`test/unit_test.dart`): แฮชรหัสผ่าน · รหัสตั๋ว · เวลาหมดอายุตั๋ว (20:00 ของวันจ่าย · จ่าย 19:59 · จ่ายหลัง 20:00) · dateKey · CSV · QR พร้อมเพย์ (CRC check 0x29B1, payload ทีละไบต์, tag 01, ความยาวไบต์ UTF-8) · สลิป (สลิปจริง KBank, ค่าอ้างอิง promptparse, ตรวจ CRC) · กันสูตร Excel ทั้งชื่อและรหัสนิสิต (ค่าจากคลาวด์ปลอมได้)
 
 **ทดสอบใช้งานจริงบน emulator (8 ต.ค. 2569)**
 | ขั้น | ผลที่ยืนยัน |
@@ -226,6 +226,22 @@
 | เอกสารรับรองสัดส่วนงาน | จัดทำ `submission/work_split.pdf` (A4 1 หน้า ตารางแบ่งงาน 4 คน + ช่องลงชื่อ/วันที่) + `submission/work_split.html` (ต้นฉบับ) → **ยังรอลงนาม 4 คน + อัปโหลด Drive** เพื่อแนบลิงก์ในฟอร์ม 3 |
 | เพิ่ม | CI (`.github/workflows/ci.yml` = analyze + test + format) · `lib/widget/scan_widgets.dart` (ช่องกรอกรหัสสำรองใช้ร่วม 2 หน้า) · ข้อความที่ประตูแสดงรวมที่ `GateService.describe()` จุดเดียว · ปุ่ม "โหมดประตู — เปิดโดยไม่ต้องล็อกอิน" (จำบัญชีเจ้าหน้าที่ไว้บนเครื่อง) · ตั๋วแสดง "ธนาคารผู้ส่ง" |
 | ยังทำไม่ได้ | กันการสร้างตั๋วปลอมจากคนอื่น (ต้อง Firebase Auth + ตรวจฝั่งเซิร์ฟเวอร์) · เปลี่ยน `kPromptPayId` เป็นบัญชีจริงของโรงยิม (ต้องมีเบอร์จริง) |
+
+**ตรวจครบทุกอย่างก่อนส่ง (21 ต.ค. 2569, 12:0x–12:2x)** — ติดตั้ง **release APK ตัวจริงที่ปล่อยบน GitHub** ลง emulator (Android 1080×2424)
+| ขั้น | ผลที่ยืนยัน |
+|---|---|
+| ติดตั้ง APK จาก Release | `adb install` สำเร็จ · แพ็กเกจ `com.nu.fitticket` · `pkgFlags` **ไม่มี DEBUGGABLE** = เป็น release build จริง |
+| sha256 ของไฟล์ที่ปล่อย | `21336e3b60bee2a8…` = ตรงกับไฟล์ที่ build ในเครื่อง → สิ่งที่ให้ดาวน์โหลด = สิ่งที่ทดสอบจริง |
+| ล็อกอินนิสิต (67000001) | เข้าหน้าแรกได้ · ไม่มีแบนเนอร์บอกบัญชีทดสอบ |
+| หน้าซื้อตั๋ว + QR พร้อมเพย์ | ถอด QR จากภาพหน้าจอด้วย OpenCV: `54=10.00` · `62/05=WR8HU9` · CRC16 `9861` ตรงกับที่คำนวณเอง · ปุ่ม "แชร์ QR ให้แอปธนาคาร" อยู่ครบ |
+| หน้าภาพรวมเจ้าหน้าที่ | **พบบั๊กวิกฤต**: การ์ดสถิติ (ใบที่ 5) ห่อ `Expanded` แต่ถูกวางใน `ListView` → error `ParentData is not a subtype of FlexParentData` → **ทั้งหน้ากลายเป็นกล่องสีเทา (ErrorWidget) ในโหมด release** = ปุ่ม "สแกนตั๋ว / รายงาน CSV / โหมดประตู" หายทั้งหมด → **แก้แล้ว** (commit `e9ea182`) |
+| หลังแก้ (build ใหม่ + ติดตั้งใหม่) | หน้าภาพรวมแสดงครบ 5 การ์ด + ปุ่มสแกน/รายงาน/โหมดประตู + "รายชื่อที่เข้าใช้วันนี้" · logcat ไม่มี error |
+| โหมดประตู | เปิดได้ · กล้องทำงาน (ขอสิทธิ์กล้อง) · ช่องกรอกรหัสสำรอง + ปุ่ม "ตรวจรหัสสำรับ" |
+| ออกจากระบบ | **พบบั๊ก**: `account!` ที่ `lib/screens/student_home.dart` → error ตอนออกจากระบบ (ใน release แสดงเป็นกล่องสีเทา) → **แก้แล้ว** (commit `e9ea182`) |
+| คลาวด์ | `/tickets` · `/entries` · `/slips` = ว่างทั้งหมด (อ่านแบบ anonymous ได้ 200 → `null`) · กฎ create-only ทำงาน · ไม่มีข้อมูลทดสอบค้างให้ล้างก่อนนำเสนอ |
+| `flutter analyze` · `flutter test` | No issues found · **41/41 ผ่าน** |
+| clone ใหม่ที่ commit ที่ส่ง | `git clone` → `git checkout e9ea182` → `flutter pub get` → `flutter analyze` = **No issues found** · `flutter test` = **41/41 ผ่าน** (ยืนยันเอง 21 ต.ค. จากโค้ดสด) |
+| tag + Release | tag **`submit-2569`** → `e9ea182` · `app-release.apk` อัปโหลดทับแล้ว (sha256 ตรงกับของในเครื่อง) |
 
 **ตรวจซ้ำหลังปรับปรุงตามผลสัมภาษณ์ (20 ต.ค. 2569, 18:00)** — debug APK บน emulator Pixel_9
 | ขั้น | ผลที่ยืนยัน |
@@ -283,11 +299,11 @@
 
 ## 11. งานที่เหลือก่อนส่ง
 
-- [x] push GitHub แล้ว (branch `main` = origin/main · hash เต็มดูได้ด้วย `git rev-parse HEAD` — กรอกในฟอร์ม 3) · [x] tag **`submit-2569`** + GitHub Release พร้อม `app-release.apk` (20 ต.ค. 21:1x) → ถ้ามี commit ใหม่หลังจากนี้ ให้ `git tag -f submit-2569 && git push --tags` และแก้ hash ในฟอร์ม 3
+- [x] push GitHub แล้ว (branch `main` = origin/main · hash เต็มดูได้ด้วย `git rev-parse HEAD` — กรอกในฟอร์ม 3) · [x] tag **`submit-2569`** → `e9ea182bbb4af289282a92a3747d64ebb8551a10` + GitHub Release พร้อม `app-release.apk` (อัปโหลดทับ 21 ต.ค. หลังแก้บั๊กหน้าเจ้าหน้าที่)
 - [ ] **ฟอร์ม 3** — กรอกครบ + ติ๊กยืนยัน 8/8 + ใส่ลิงก์เอกสารลงนามแล้ว 20 ต.ค. 21:1x ✅ · **เหลือกด Submit** (ผู้ใช้กดเอง) · ลิงก์เอกสารลงนาม = <https://drive.google.com/file/d/1c0T7uXoyoMKIVn9NyemEkHiSIb5-Rbik/view?usp=sharing> (`work_split.pdf` ลงชื่อ+วันที่ครบ 4 คน · เปิดดูได้โดยไม่ต้องล็อกอิน · ตรวจแล้ว 20 ต.ค.)
 - [x] **ฟอร์ม 2** (บันทึกการพบผู้ใช้) ✅ ส่งแล้ว 20 ต.ค. 2569 — พบ 14:00 น. ที่ NU Fitness · ผู้ให้สัมภาษณ์ รัตตกานต์ ตาลวิราช (นักวิชาการโสตทัศนศึกษา กองกิจการนิสิต มหาวิทยาลัยนเรศ) · ข้อความที่กรอก: `submission/forms_checklist.md`
 - [ ] `SUBMISSION.pdf` — export ตาม `SUBMISSION_TEMPLATE.docx` (ตัวจริง) + ลงนามครบ 4 คน + วางที่ราก repo
-- [ ] ติดตั้ง `app-release.apk` ลงมือถือ Android จริง + ซ้อมเส้นทางกรอกรหัสสำรอง (กล้องอาจไม่พร้อมในห้องสอบ)
+- [x] ติดตั้ง **release APK ที่ปล่อยบน Release** ลงอุปกรณ์แล้ว ✅ 21 ต.ค. (emulator · ยืนยันทุกหน้าจอ + QR + โหมดประตู) · [ ] ยังต้องลองบน **มือถือจริง** + ซ้อมเส้นทางกรอกรหัสสำรอง (กล้องอาจไม่พร้อมในห้องสอบ)
       · **แพ็กเกจเปลี่ยนเป็น `com.nu.fitticket` (20 ต.ค.)** → ถ้าเคยติดตั้งเวอร์ชันเดิม (`com.example.nu_fitticket`) ต้องถอนก่อน ทั้งคู่จะอยู่เคียงกันได้
 - [ ] **เปลี่ยน `kPromptPayId` ใน `lib/config.dart` เป็นเบอร์พร้อมเพย์จริงของโรงยิม** แล้ว build ใหม่ (แอปไม่มี banner เตือน ต้องตั้งเองตามรายการนี้)
 - [ ] **สำรอง `android/nu-fitticket-release.jks` + `android/key.properties` ไว้นอกรีโป** — หายแล้วติดตั้งแอปเวอร์ชันใหม่ทับของเดิมไม่ได้ (ลายเซ็นไม่ตรง)
@@ -336,10 +352,10 @@
 | อะไร | ที่อยู่ |
 |---|---|
 | ซอร์สโค้ด | <https://github.com/firstatipat-cpu/nu_fitticket> (branch `main`) |
-| คอมมิตที่ส่ง | `d2523f3b436653970b85e7294b532762a47d6725` (tag `submit-2569`) |
-| ไฟล์ติดตั้ง (APK) | <https://github.com/firstatipat-cpu/nu_fitticket/releases/download/submit-2569/app-release.apk> (67.3 MB · แพ็กเกจ `com.nu.fitticket` · sign ด้วย release key ของโปรเจกต์) |
+| คอมมิตที่ส่ง | `e9ea182bbb4af289282a92a3747d64ebb8551a10` (tag `submit-2569`) |
+| ไฟล์ติดตั้ง (APK) | <https://github.com/firstatipat-cpu/nu_fitticket/releases/download/submit-2569/app-release.apk> (67.3 MB · แพ็กเกจ `com.nu.fitticket` · sign ด้วย release key ของโปรเจกต์ · build จาก commit `e9ea182` 21 ต.ค.) |
 | Release | <https://github.com/firstatipat-cpu/nu_fitticket/releases/tag/submit-2569> |
-| เอกสารรับรองสัดส่วนงาน | `submission/work_split.pdf` (A4 1 หน้า · ต้นฉบับ `work_split.html`) → ลงนาม 4 คน → อัปโหลด Drive → ใส่ลิงก์ในฟอร์ม 3 |
+| เอกสารรับรองสัดส่วนงาน | <https://drive.google.com/file/d/1c0T7uXoyoMKIVn9NyemEkHiSIb5-Rbik/view?usp=sharing> (`submission/work_split.pdf` · A4 1 หน้า · ลงชื่อ+วันที่ครบ 4 คน · เปิดดูได้โดยไม่ต้องล็อกอิน) |
 | กฎ Firebase (ต้อง publish เอง) | `firebase.rules.json` ในรีโโค |
 | เอกสารรายงานส่ง | **ไม่ต้องทำ** — อาจารย์ระบุว่า "สิ่งที่ส่งจริงคือฟอร์ม 3 ใบเดียว ไม่ต้องจัดทำเอกสารประกอบการส่งใน repository" · ตัวอย่างรูปแบบที่อาจารย์ให้ = `submission/FORM_EXAMPLE (1).docx` · สรุปสิ่งที่ต้องกรอกในแต่ละฟอร์ม = `submission/forms_checklist.md` |
 
