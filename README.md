@@ -1,17 +1,115 @@
-# nu_fitticket
+# NU FitTicket
 
-A new Flutter project.
+แอปซื้อตั๋วเข้าใช้ **NU Fitness** — นิสิตซื้อตั๋ว 10 บาทในแอป (ใช้ได้ 1 วัน) แล้วโชว์ QR ให้เจ้าหน้าที่สแกนตอนเข้าใช้
 
-## Getting Started
+> สถานะงาน ข้อกำหนด สถาปัตยกรรม และข้อจำกัดทั้งหมดอยู่ที่ **[SPEC.md](SPEC.md)**
+> รีโป: https://github.com/firstatipat-cpu/nu_fitticket
 
-This project is a starting point for a Flutter application.
+โครงงานรายวิชา Mobile Application Development (กลุ่ม 4 คน) — Flutter
 
-A few resources to get you started if this is your first Flutter project:
+## สองบทบาทในแอปเดียว
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+| บทบาท | ทำอะไร |
+|---|---|
+| นิสิต | สมัคร/ล็อกอิน → ซื้อตั๋ว (โชว์ QR ชำระ) → เปิดตั๋วโชว์เจ้าหน้าที่ → ดูประวัติ |
+| เจ้าหน้าที่ | สแกน QR ตั๋ว หรือกรอกรหัสสำรอง → เห็นยอดขาย/คนที่เข้าใช้ของวันนี้ → ส่งออกรายงาน CSV |
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ต้องมี
+
+- Flutter 3.44+ (Dart 3.12+)
+- Android (แอปใช้กล้องสแกน QR)
+
+## ตั้งค่า Firebase (จำเป็นสำหรับใช้ข้ามเครื่อง)
+
+1. สร้างโปรเจกต์ที่ https://console.firebase.google.com
+2. สร้าง **Realtime Database** → เลือก **Start in test mode**
+3. คัดลอก URL ของฐานข้อมูล (ลงท้ายด้วย `firebasedatabase.app`)
+4. เปิด `lib/config.dart` แล้วแทนที่ค่า `kDatabaseUrl` ด้วย URL นั้น
+
+> URL นี้เป็นค่าสาธารณะ ไม่ใช่คีย์ลับ — ห้ามใส่คีย์/โทเคน/รหัสผ่านจริงในโปรเจกต์
+> ถ้ายังไม่ตั้งค่า แอปยังรันได้ แต่จะเห็นเฉพาะข้อมูลที่อยู่ในเครื่องตัวเอง
+
+## รัน
+
+```bash
+flutter pub get
+flutter run
+```
+
+- ครั้งแรกแอปจะสร้างฐานข้อมูลในเครื่องและใส่บัญชีทดสอบให้เอง
+- ต้องอนุญาตสิทธิ์กล้องเมื่อเข้าหน้าสแกนตั๋ว
+- ถ้ากล้องใช้ไม่ได้ ให้ใช้ช่อง **กรอกรหัสตั๋ว** ด้านล่างแทน
+
+## สร้าง APK ติดตั้งบนมือถือ
+
+```bash
+flutter build apk --release   # build/app/outputs/flutter-apk/app-release.apk
+```
+
+ติดตั้งด้วยการส่งไฟล์เข้าเครื่องแล้วกดเปิด (อนุญาต "ติดตั้งจากแหล่งที่ไม่รู้จัก") หรือ `adb install app-release.apk`
+APK นี้ sign ด้วย debug keystore — ใช้ sideload/เดโมได้ ใช้ขึ้น Play Store ไม่ได้
+
+## การชำระเงิน (ทำงานจริง)
+
+1. นิสิตกดซื้อตั๋ว → แอปสร้าง **QR พร้อมเพย์มาตรฐาน EMVCo** ที่ฝัง **ยอดเงิน 10.00 บาท** และ
+   **เลขที่อ้างอิง = รหัสตั๋ว** (ดู `lib/services/promptpay.dart`)
+2. สแกนด้วยแอปธนาคาร → เงินโอนเข้าพร้อมเพย์ที่ตั้งค่าไว้ (`kPromptPayId`) จริง
+3. นิสิตแคปหน้าสลิป → กด **"แนบสลิปเพื่อยืนยันการโอน"** → เลือกภาพสลิปจากคลังภาพ
+4. แอปตรวจเองทั้งหมด: ถอด QR จากภาพ → เป็นสลิปโอนธนาคารไทย → **CRC ถูกต้อง** →
+   **เลขที่รายการยังไม่เคยใช้** → ออกตั๋วสถานะ "ชำระแล้ว"
+5. เจ้าหน้าที่สแกน **QR ตั๋ว** ที่ประตู (สแกนครั้งเดียว) แล้วเห็นว่า "ชำระแล้ว · สลิป …"
+
+**ตรวจไม่ได้ (ต้องรู้ข้อจำกัดนี้):** จำนวนเงิน และผู้รับ ไม่มีอยู่ใน QR ของสลิป
+จึงยืนยันได้แค่ว่า "เป็นสลิปจริงและไม่ถูกใช้ซ้ำ" ไม่ได้ยืนยันว่าจ่ายครบ 10 บาท
+และยังรองรับสลิปทุกธนาคาร
+
+## กฎความปลอดภัยของ Firebase (ต้องใส่ทุกครั้ง)
+
+นำเนื้อหาใน `firebase.rules.json` ไปวางใน Console → Realtime Database → แท็บ **Rules** แล้วกด Publish
+
+กฎนี้ทำให้ทุกโหนดเป็น **เขียนได้ครั้งเดียว (create-only)**: ห้ามแก้ทับและห้ามลบ
+จุดสำคัญคือ `/slips` — ถ้าลบได้ ผู้ใช้ที่รู้ URL จะลบเลขที่รายการแล้วเอาสลิปเดิมมาใช้ซ้ำได้
+
+> ยังเปิดให้อ่านได้ทุกคน เพราะแอปไม่มีระบบล็อกอินกับ Firebase (จงใจไม่ใช้ SDK)
+> ถ้าต้องการปิดให้ใช้ Firebase Auth + ปรับกฎ — ดูหัวข้อ "ข้อจำกัด" ด้านล่าง
+>
+> **กฎนี้กันอะไรได้ / ไม่ได้:** กันการลบและแก้ทับ (ลบสลิปเพื่อใช้ซ้ำ · ยกเลิกตั๋ว · แก้บันทึกเข้าใช้)
+> แต่ **ยังกันการ "สร้างของปลอมใหม่" ไม่ได้** — คนที่รู้ URL ยัง POST ตั๋วหรือสลิปใหม่ได้เอง
+> การกันจุดนั้นต้องมี Firebase Auth + Cloud Functions ตรวจฝั่งเซิร์ฟเวอร์ ซึ่งนอกขอบเขตงานนี้
+
+## บัญชีทดสอบ
+
+| บัญชี | รหัสผ่าน | บทบาท |
+|---|---|---|
+| `staff01` | `test1234` | เจ้าหน้าที่ |
+| `67000001` | `test1234` | นิสิต |
+
+## เทสต์
+
+```bash
+flutter test   # ตอนนี้ 22 เทสต์ — ต้องผ่านทั้งหมด
+```
+
+## โครงสร้างไฟล์ (แยกตามเจ้าของ)
+
+| คน | รหัสนิสิต | ไฟล์ |
+|---|---|---|
+| 1 — ซื้อตั๋ว + QR ชำระ | 67310379 | `lib/screens/buy_ticket_page.dart` · `lib/services/promptpay.dart` · `lib/services/ticket_service.dart` |
+| 2 — ล็อกอิน + หน้าตั๋ว + ธีม | 67317088 | `lib/screens/login_page.dart` · `register_page.dart` · `student_home.dart` · `ticket_page.dart` · `lib/services/auth_service.dart` · `password.dart` · `lib/state/` · `lib/theme/` · `lib/widget/` |
+| 3 — เจ้าหน้าที่ + สแกน + CSV | 67314858 | `lib/screens/staff_dashboard.dart` · `scan_ticket_page.dart` · `report_page.dart` · `lib/services/gate_service.dart` · `slip_parser.dart` · `report_export.dart` |
+| 4 — ชั้นข้อมูล + คลาวด์ | 67316807 | `lib/db/` · `lib/services/cloud_service.dart` · `lib/models/` · `lib/screens/history_page.dart` · `lib/config.dart` · `test/` |
+
+## ข้อจำกัด (เขียนไว้ตรง ๆ ไม่ให้เข้าใจผิด)
+
+1. การชำระเงิน **เป็นของจริงในระดับที่ทำได้** — QR เป็น PromptPay มาตรฐานที่สแกนจ่ายจริง
+   และแอปตรวจสลิปของธนาคารทุกแห่ง (โครงสร้าง + CRC + กันสลิปซ้ำ) แต่ **ยืนยันจำนวนเงิน/ผู้รับไม่ได้**
+   เพราะไม่มีข้อมูลนั้นใน QR ของสลิป
+2. ไม่มีการยืนยันตัวตนกับมหาวิทยาลัย — สมัครด้วยรหัสนิสิตใดก็ได้
+3. QR ตั๋วส่งต่อให้ผู้อื่นได้ — บรรเทาด้วยการแสดงชื่อและรหัสนิสิตบนตั๋วให้เจ้าหน้าที่เทียบ
+4. ต้องมีอินเทอร์เน็ตอย่างน้อยครั้งแรกเพื่อสร้าง/ดึงข้อมูลบนคลาวด์ หลังจากนั้นใช้แคชได้
+5. กฎความปลอดภัยของ Realtime Database เป็นแบบเปิด (โหมดทดสอบ) — เหมาะกับเดโม
+   ไม่ใช่ระบบจริง
+6. **ออฟไลน์อาจออกตั๋วให้สลิปที่ถูกใช้แล้วได้** — ตรวจสลิปตอนออฟไลน์อ่านได้แค่แคชในเครื่อง
+   ตอนซิงก์คลาวด์จะปฏิเสธสลิปซ้ำ แต่ตั๋วที่ออกไปแล้วแก้สถานะกลับไม่ได้
+7. **สแกนพร้อมกันเป๊ะ ๆ อาจซ้ำได้** — บันทึกการเข้าใช้เป็น read-then-write
+   มีโอกาสนับคนซ้ำเล็กน้อย

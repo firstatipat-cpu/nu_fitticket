@@ -1,4 +1,5 @@
 /// หมายเหตุ: นี่คือ URL สาธารณะ ไม่ใช่คีย์ลับ — ห้ามใส่คีย์/โทเคน/รหัสผ่านจริงในไฟล์นี้
+/// เจ้าของ: <67316807>
 const String kDatabaseUrl =
     'https://nu-fitticket-default-rtdb.asia-southeast1.firebasedatabase.app';
 

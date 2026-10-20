@@ -8,7 +8,7 @@ import 'cloud_service.dart';
 import 'slip_parser.dart';
 
 /// ออกตั๋วและค้นหาตั๋ว NU Fitness
-/// เจ้าของ: <รหัสนิสิตคนที่ 1>
+/// เจ้าของ: <67310379>
 class TicketService {
   TicketService._();
 
