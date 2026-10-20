@@ -33,12 +33,6 @@ DateTime ticketExpiryFor(DateTime purchasedAt) {
 /// (ค่าคงที่นี้ไม่ใช่ความลับ — เบอร์พร้อมเพย์เปิดเผยได้)
 const String kPromptPayId = '0630921644';
 
-/// เบอร์ที่ถือว่า "ยังไม่ใช่ของโรงยิมจริง" — ใช้เตือนผู้ดูแลระบบก่อนสาธิต
-/// (ค่าคงที่เหล่านี้เปิดเผยได้ ไม่ใช่ความลับ)
-const Set<String> kPromptPayTestIds = {'0899999999', '0630921644'};
-
+/// ชื่อร้าน/เมืองที่ใส่ใน QR พร้อมเพย์ (ค่าคงที่ ไม่ใช่ความลับ)
 const String kPromptPayName = 'NU FITNESS';
 const String kPromptPayCity = 'PHITSANULOK';
-
-/// true = ยังใช้เบอร์ทดสอบอยู่ ควรเปลี่ยนเป็นบัญชีของโรงยิมก่อนใช้งานจริง
-bool get isPromptPaySample => kPromptPayTestIds.contains(kPromptPayId);

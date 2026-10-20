@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../models/entry.dart';
 import '../models/ticket.dart';
-import '../config.dart';
 import '../services/cloud_service.dart';
 import '../services/gate_service.dart';
 import '../state/app_state.dart';
@@ -220,30 +219,6 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                         'ออฟไลน์อยู่ — กำลังแสดงข้อมูลล่าสุดที่บันทึกไว้ในเครื่อง',
                         style: TextStyle(
                           color: AppColors.orangeDark,
-                          fontSize: 12,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (isPromptPaySample)
-            Card(
-              color: AppColors.danger.withValues(alpha: 0.10),
-              child: const Padding(
-                padding: EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    Icon(Icons.warning_amber, color: AppColors.danger),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'ยังตั้งบัญชีรับเงินเป็นเบอร์ทดสอบ — '
-                        'เปลี่ยน kPromptPayId ใน lib/config.dart เป็นบัญชีของโรงยิมก่อนใช้งานจริง',
-                        style: TextStyle(
-                          color: AppColors.danger,
                           fontSize: 12,
                           height: 1.4,
                         ),

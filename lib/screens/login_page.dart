@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../db/schema.dart';
 import '../models/account.dart';
 import '../services/auth_service.dart';
 import '../state/app_state.dart';
@@ -216,19 +215,6 @@ class _LoginPageState extends State<LoginPage> {
                       style: const TextStyle(
                         color: AppColors.muted,
                         fontSize: 11,
-                      ),
-                    ),
-                  ],
-                  if (_staffMode) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'บัญชีทดสอบ ${Schema.seedStaffLogin} / ${Schema.seedPassword} '
-                      '— ใช้สาธิตเท่านั้น เปลี่ยนก่อนใช้งานจริง',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.orangeDark,
-                        fontSize: 11,
-                        height: 1.4,
                       ),
                     ),
                   ],
