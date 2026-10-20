@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:ui' show ImageByteFormat;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../config.dart';
 import '../services/promptpay.dart';
@@ -30,9 +33,44 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
   /// สร้างรหัสตั๋วล่วงหน้า เพื่อให้ตรงกับเลขอ้างอิงใน QR รับเงิน
   final String _code = TicketService.newCode();
 
+  /// ใช้จับภาพ QR เป็น PNG เพื่อแชร์ให้แอปธนาคาร (บางแอปสแกน QR จากรูปในแกลเลอรีได้)
+  final _qrKey = GlobalKey();
+
   bool _busy = false;
   bool _failed = false;
   String? _error;
+
+  /// แชร์รูป QR ให้แอปอื่น (เช่น แอปธนาคาร) — เปิดด้วยเมนูแชร์ของเครื่อง
+  Future<void> _shareQr() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final boundary =
+          _qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3);
+      final data = await image.toByteData(format: ImageByteFormat.png);
+      if (data == null) throw StateError('สร้างรูปไม่สำเร็จ');
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(
+              data.buffer.asUint8List(),
+              mimeType: 'image/png',
+              name: 'nu-fitticket-qr-$_code.png',
+            ),
+          ],
+          subject: 'QR พร้อมเพย์ $kFacilityName $_amount บาท',
+          text:
+              'QR พร้อมเพย์ $_amount บาท (รหัสอ้างอิง $_code) — เปิดในแอปธนาคารแล้วเลือก "สแกนจากรูป"',
+        ),
+      );
+    } catch (e) {
+      if (mounted) setState(() => _error = 'แชร์ QR ไม่สำเร็จ: $e');
+    }
+    if (mounted) setState(() => _busy = false);
+  }
 
   String get _amount => (kTicketPriceCents / 100).toStringAsFixed(2);
 
@@ -136,11 +174,31 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.line),
                     ),
-                    child: QrImageView(
-                      data: _payload,
-                      version: QrVersions.auto,
-                      size: 220,
-                      backgroundColor: Colors.white,
+                    child: RepaintBoundary(
+                      key: _qrKey,
+                      child: QrImageView(
+                        data: _payload,
+                        version: QrVersions.auto,
+                        size: 220,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.ios_share),
+                    label: const Text('แชร์ QR ให้แอปธนาคาร'),
+                    onPressed: _busy ? null : _shareQr,
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'ถ้าแอปธนาคารของคุณสแกน QR จากรูปได้ ให้แชร์รูปนี้ไปเปิดในแอปธนาคาร '
+                    '(ปุ่มเลือกรูปในหน้าสแกน) · ถ้าไม่ได้ ให้ใช้กล้องของอีกเครื่องสแกนหน้าจอนี้',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 11,
+                      height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 12),
