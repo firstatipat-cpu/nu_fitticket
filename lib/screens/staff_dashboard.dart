@@ -11,6 +11,7 @@ import '../theme/app_theme.dart';
 import 'login_page.dart';
 import 'report_page.dart';
 import 'scan_ticket_page.dart';
+import 'gate_kiosk_page.dart';
 
 /// R4 — ภาพรวมวันนี้: ยอดขายตั๋ว + คนที่เข้าใช้ (ไม่ต้องนับเอง)
 /// เจ้าของ: <67314858>
@@ -246,7 +247,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
               _StatCard(
                 icon: Icons.groups,
                 label: 'คนที่เข้าใช้วันนี้',
-                value: '${data.entriesToday.length} คน',
+                value: '${data.entriesToday.where((e) => e.paid).length} คน',
               ),
               const SizedBox(width: 12),
               _StatCard(
@@ -256,6 +257,13 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                 highlight: data.pending > 0,
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          _StatCard(
+            icon: Icons.report_gmailerrorred,
+            label: 'เดินผ่านประตูโดยยังไม่ชำระ',
+            value: '${data.entriesToday.where((e) => !e.paid).length} คน',
+            highlight: data.entriesToday.any((e) => !e.paid),
           ),
           const SizedBox(height: 16),
           Row(
@@ -284,6 +292,20 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.phonelink_ring),
+              label: const Text('โหมดประตู — สแกนเอง ไม่ต้องมีคนเฝ้า'),
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const GateKioskPage()),
+                );
+                _load();
+              },
+            ),
+          ),
           const Divider(height: 32),
           Text(
             'รายชื่อที่เข้าใช้วันนี้',
@@ -300,9 +322,16 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
           for (final entry in data.entriesToday)
             ListTile(
               dense: true,
-              leading: const Icon(Icons.person),
+              leading: Icon(
+                entry.paid ? Icons.person : Icons.person_off,
+                color: entry.paid ? AppColors.orange : AppColors.danger,
+              ),
               title: Text('${entry.studentId} — ${entry.studentName}'),
-              subtitle: Text('รหัสตั๋ว ${entry.code}'),
+              subtitle: Text(
+                entry.paid
+                    ? 'รหัสตั๋ว ${entry.code}'
+                    : 'รหัสตั๋ว ${entry.code} · เดินผ่านโดยยังไม่ชำระ',
+              ),
               trailing: Text(time.format(entry.time)),
             ),
         ],

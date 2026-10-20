@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../config.dart';
 import '../models/ticket.dart';
 import '../theme/app_theme.dart';
+import '../widget/payment_badge.dart';
 
 /// ตั๋วที่นิสิตโชว์ให้เจ้าหน้าที่ — มี QR และรหัสสำรองให้กรอกได้
 /// เจ้าของ: <67317088>
@@ -43,32 +44,41 @@ class TicketPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             const Text(
-                              'ตั๋ว 1 วัน',
+                              'ตั๋วถึง 20:00 น.',
                               style: TextStyle(color: AppColors.muted),
                             ),
                           ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              (expired ? AppColors.danger : AppColors.success)
-                                  .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          expired ? 'หมดอายุ' : 'ใช้ได้',
-                          style: TextStyle(
-                            color: expired
-                                ? AppColors.danger
-                                : AppColors.success,
-                            fontWeight: FontWeight.w700,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (expired
+                                          ? AppColors.danger
+                                          : AppColors.success)
+                                      .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              expired ? 'หมดอายุ' : 'ใช้ได้',
+                              style: TextStyle(
+                                color: expired
+                                    ? AppColors.danger
+                                    : AppColors.success,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 6),
+                          PaymentBadge(paid: ticket.isPaid, compact: true),
+                        ],
                       ),
                     ],
                   ),
@@ -106,7 +116,7 @@ class TicketPage extends StatelessWidget {
                   _Row(label: 'รหัสนิสิต', value: ticket.studentId),
                   _Row(
                     label: 'การชำระเงิน',
-                    value: ticket.isPaid ? 'ชำระแล้ว' : 'ยังไม่ยืนยัน',
+                    value: ticket.isPaid ? 'ชำระแล้ว' : 'ยังไม่ชำระ',
                   ),
                   if (ticket.slipRef != null)
                     _Row(label: 'เลขที่รายการ', value: ticket.slipRef!),

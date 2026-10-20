@@ -7,6 +7,7 @@ import '../models/ticket.dart';
 import '../services/ticket_service.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
+import '../widget/payment_badge.dart';
 
 /// ประวัติการซื้อตั๋วของนิสิต
 /// เจ้าของ: <67316807>
@@ -91,9 +92,13 @@ class _HistoryPageState extends State<HistoryPage> {
             color: expired ? AppColors.muted : AppColors.orange,
           ),
           title: Text('$kFacilityName · รหัส ${ticket.code}'),
-          subtitle: Text(
-            'ซื้อเมื่อ ${format.format(ticket.purchasedTime)} · '
-            '${ticket.isPaid ? 'ชำระแล้ว' : 'ยังไม่ยืนยันการชำระ'}',
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('ซื้อเมื่อ ${format.format(ticket.purchasedTime)}'),
+              const SizedBox(height: 6),
+              PaymentBadge(paid: ticket.isPaid, compact: true),
+            ],
           ),
           trailing: Text(
             '${ticket.priceBaht.toStringAsFixed(0)} ฿',

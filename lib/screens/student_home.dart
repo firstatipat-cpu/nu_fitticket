@@ -152,7 +152,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'ตั๋ว $kFacilityName ราคา ${(kTicketPriceCents / 100).toStringAsFixed(0)} บาท ใช้ได้ 1 วัน',
+                        'ตั๋ว $kFacilityName ราคา ${(kTicketPriceCents / 100).toStringAsFixed(0)} บาท ใช้ได้ถึง 20:00 น.',
                         style: const TextStyle(color: AppColors.muted),
                       ),
                       const SizedBox(height: 16),
@@ -175,7 +175,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                     leading: const Icon(Icons.add_shopping_cart),
                     title: const Text('ซื้อตั๋ว NU Fitness'),
                     subtitle: Text(
-                      '${(kTicketPriceCents / 100).toStringAsFixed(0)} บาท · ใช้ได้ 1 วัน',
+                      '${(kTicketPriceCents / 100).toStringAsFixed(0)} บาท · ใช้ได้ถึง 20:00 น.',
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _buy,

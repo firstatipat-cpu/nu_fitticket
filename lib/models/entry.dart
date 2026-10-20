@@ -9,6 +9,7 @@ class Entry {
     required this.priceCents,
     required this.ts,
     required this.date,
+    this.paid = true,
   });
 
   final String id;
@@ -17,6 +18,10 @@ class Entry {
   final String studentName;
   final int priceCents;
   final int ts;
+
+  /// true = เข้ามาด้วยตั๋วที่ชำระแล้ว · false = เดินผ่านมาโดยยังไม่ชำระ
+  /// (ผลจากการสัมภาษณ์ 20 ต.ค. 2569 — ให้รู้ว่าใครเดินผ่านประตูโดยไม่จ่าย)
+  final bool paid;
 
   /// วันที่แบบ yyyy-MM-dd (เวลาเครื่อง) ใช้สำหรับนับ "คนละ 1 ครั้งต่อวัน"
   final String date;
@@ -30,6 +35,7 @@ class Entry {
     'price_cents': priceCents,
     'ts': ts,
     'date': date,
+    'paid': paid,
   };
 
   factory Entry.fromJson(Map<String, Object?> json) => Entry(
@@ -40,6 +46,12 @@ class Entry {
     priceCents: (json['price_cents']! as num).toInt(),
     ts: (json['ts']! as num).toInt(),
     date: json['date']! as String,
+    // ข้อมูลเก่าไม่มีฟิลด์นี้ → ถือว่าชำระแล้ว (ไม่ให้ข้อมูลเดิมกลายเป็นคนค้างชำระ)
+    paid: switch (json['paid']) {
+      final bool v => v,
+      final num v => v != 0,
+      _ => true,
+    },
   );
 
   factory Entry.fromNode(String id, Map<String, Object?> json) =>

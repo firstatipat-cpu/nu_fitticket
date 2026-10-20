@@ -21,7 +21,7 @@ class TicketService {
     (_) => _alphabet[_random.nextInt(_alphabet.length)],
   ).join();
 
-  /// R1 — ออกตั๋ว NU Fitness ราคา 10 บาท ใช้ได้ 1 วัน
+  /// R1 — ออกตั๋ว NU Fitness ราคา 10 บาท ใช้ได้ถึง 20:00 น. ของวันที่จ่าย
   /// [code] ส่งเข้ามาได้เมื่อต้องการให้รหัสตั๋วตรงกับเลขอ้างอิงใน QR รับเงิน
   ///
   /// ponytail: สุ่มรหัส 6 ตัว (32^6 ≈ 1e9) ไม่ได้เช็คซ้ำกับคลาวด์ — โอกาสชนกันน้อยมาก
@@ -38,7 +38,7 @@ class TicketService {
       studentName: studentName,
       priceCents: kTicketPriceCents,
       purchasedAt: now.millisecondsSinceEpoch,
-      expiresAt: now.add(kTicketValidity).millisecondsSinceEpoch,
+      expiresAt: ticketExpiryFor(now).millisecondsSinceEpoch,
       slipRef: slipRef,
     );
     await CloudService.saveTicket(ticket);

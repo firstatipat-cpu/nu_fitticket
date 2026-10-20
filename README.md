@@ -1,6 +1,6 @@
 # NU FitTicket
 
-แอปซื้อตั๋วเข้าใช้ **NU Fitness** — นิสิตซื้อตั๋ว 10 บาทในแอป (ใช้ได้ 1 วัน) แล้วโชว์ QR ให้เจ้าหน้าที่สแกนตอนเข้าใช้
+แอปซื้อตั๋วเข้าใช้ **NU Fitness** — นิสิตซื้อตั๋ว 10 บาทในแอป (ใช้ได้ถึง 20:00 น. ของวันที่จ่าย) แล้วโชว์ QR ให้เจ้าหน้าที่สแกนตอนเข้าใช้
 
 > สถานะงาน ข้อกำหนด สถาปัตยกรรม และข้อจำกัดทั้งหมดอยู่ที่ **[SPEC.md](SPEC.md)**
 > รีโป: https://github.com/firstatipat-cpu/nu_fitticket
@@ -12,7 +12,8 @@
 | บทบาท | ทำอะไร |
 |---|---|
 | นิสิต | สมัคร/ล็อกอิน → ซื้อตั๋ว (โชว์ QR ชำระ) → เปิดตั๋วโชว์เจ้าหน้าที่ → ดูประวัติ |
-| เจ้าหน้าที่ | สแกน QR ตั๋ว หรือกรอกรหัสสำรอง → เห็นยอดขาย/คนที่เข้าใช้ของวันนี้ → ส่งออกรายงาน CSV |
+| เจ้าหน้าที่ | สแกน QR ตั๋ว หรือกรอกรหัสสำรอง → เห็นยอดขาย/คนที่เข้าใช้ของวันนี้ + จำนวนคนที่เดินผ่านโดยยังไม่ชำระ → ส่งออกรายงาน CSV |
+| โหมดประตู (ไม่ต้องมีคนเฝ้า) | ตั้งเครื่องที่ประตู → นิสิตสแกน QR ตัวเอง → ระบบตรวจชำระแล้ว/ยังไม่ชำระและบันทึกเข้าใช้ให้อัตโนมัติ |
 
 ## ต้องมี
 
@@ -70,6 +71,11 @@ APK นี้ sign ด้วย debug keystore — ใช้ sideload/เดโ�
 กฎนี้ทำให้ทุกโหนดเป็น **เขียนได้ครั้งเดียว (create-only)**: ห้ามแก้ทับและห้ามลบ
 จุดสำคัญคือ `/slips` — ถ้าลบได้ ผู้ใช้ที่รู้ URL จะลบเลขที่รายการแล้วเอาสลิปเดิมมาใช้ซ้ำได้
 
+> **กฎที่ deploy อยู่จริงเข้มกว่าไฟล์นี้อีกชั้น (ตรวจ 20 ต.ค. 2569):** `PUT /tickets/<code>` ได้ 401 ถ้า payload
+> ไม่มี `slip_ref` → ตั๋วที่ยังไม่ยืนยันการชำระสร้างบนคลาวด์ไม่ได้ (แอปออกตั๋วหลังผ่านการตรวจสลิปแล้วเท่านั้น)
+> และลบ/แก้ทับทุกโหนดไม่ได้ (ทดสอบแล้ว = 401) · ไฟล์ `firebase.rules.json` ในรีโปคือ **นโยบายขั้นต่ำ**
+> ถ้าต้องการให้ตรงกับของที่ deploy อยู่ ให้คัดลอกกฎจากแท็บ **Rules** ใน Console มาทับไฟล์นี้ (แล้ว publish กลับ)
+
 > ยังเปิดให้อ่านได้ทุกคน เพราะแอปไม่มีระบบล็อกอินกับ Firebase (จงใจไม่ใช้ SDK)
 > ถ้าต้องการปิดให้ใช้ Firebase Auth + ปรับกฎ — ดูหัวข้อ "ข้อจำกัด" ด้านล่าง
 >
@@ -87,7 +93,7 @@ APK นี้ sign ด้วย debug keystore — ใช้ sideload/เดโ�
 ## เทสต์
 
 ```bash
-flutter test   # ตอนนี้ 22 เทสต์ — ต้องผ่านทั้งหมด
+flutter test   # ตอนนี้ 32 เทสต์ — ต้องผ่านทั้งหมด
 ```
 
 ## โครงสร้างไฟล์ (แยกตามเจ้าของ)
@@ -96,7 +102,7 @@ flutter test   # ตอนนี้ 22 เทสต์ — ต้องผ่า
 |---|---|---|
 | 1 — ซื้อตั๋ว + QR ชำระ | 67310379 | `lib/screens/buy_ticket_page.dart` · `lib/services/promptpay.dart` · `lib/services/ticket_service.dart` |
 | 2 — ล็อกอิน + หน้าตั๋ว + ธีม | 67317088 | `lib/screens/login_page.dart` · `register_page.dart` · `student_home.dart` · `ticket_page.dart` · `lib/services/auth_service.dart` · `password.dart` · `lib/state/` · `lib/theme/` · `lib/widget/` |
-| 3 — เจ้าหน้าที่ + สแกน + CSV | 67314858 | `lib/screens/staff_dashboard.dart` · `scan_ticket_page.dart` · `report_page.dart` · `lib/services/gate_service.dart` · `slip_parser.dart` · `report_export.dart` |
+| 3 — เจ้าหน้าที่ + สแกน + CSV | 67314858 | `lib/screens/staff_dashboard.dart` · `scan_ticket_page.dart` · `gate_kiosk_page.dart` · `report_page.dart` · `lib/services/gate_service.dart` · `slip_parser.dart` · `report_export.dart` |
 | 4 — ชั้นข้อมูล + คลาวด์ | 67316807 | `lib/db/` · `lib/services/cloud_service.dart` · `lib/models/` · `lib/screens/history_page.dart` · `lib/config.dart` · `test/` |
 
 ## ข้อจำกัด (เขียนไว้ตรง ๆ ไม่ให้เข้าใจผิด)

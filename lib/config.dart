@@ -9,8 +9,22 @@ const int kTicketPriceCents = 1000;
 /// ชื่อสถานที่ที่มีตั๋วขาย
 const String kFacilityName = 'NU Fitness';
 
-/// อายุตั๋ว
-const Duration kTicketValidity = Duration(days: 1);
+/// ชั่วโมงที่ตั๋วหมดอายุ (20:00 น. ของวันที่จ่ายเงิน)
+const int kTicketExpiryHour = 20;
+
+/// เวลาหมดอายุของตั๋วที่จ่ายตอน [purchasedAt] — 20:00 น. ของวันนั้น
+/// จ่ายหลัง 20:00 → ใช้ได้ถึง 20:00 น. ของวันถัดไป
+DateTime ticketExpiryFor(DateTime purchasedAt) {
+  final expiry = DateTime(
+    purchasedAt.year,
+    purchasedAt.month,
+    purchasedAt.day,
+    kTicketExpiryHour,
+  );
+  return purchasedAt.isBefore(expiry)
+      ? expiry
+      : expiry.add(const Duration(days: 1));
+}
 
 /// บัญชีพร้อมเพย์ผู้รับเงิน (ของโรงยิม)
 /// ใส่ได้ 3 แบบ: เบอร์มือถือ 10 หลัก · เลขบัตรประชาชน 13 หลัก · e-Wallet 15 หลัก

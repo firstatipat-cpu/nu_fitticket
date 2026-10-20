@@ -110,7 +110,7 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'ตั๋ว 1 วัน · $_amount บาท',
+                    'ตั๋วถึง 20:00 น. · $_amount บาท',
                     style: const TextStyle(color: AppColors.muted),
                   ),
                   const SizedBox(height: 18),

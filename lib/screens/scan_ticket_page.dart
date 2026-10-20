@@ -58,7 +58,7 @@ class _ScanTicketPageState extends State<ScanTicketPage> {
         success = true;
         message =
             '✓ ${ticket.studentName} (${ticket.studentId}) เข้าใช้ได้'
-            '\n${ticket.isPaid ? 'ชำระแล้ว · สลิป ${ticket.slipRef}' : 'ยังไม่ยืนยันการชำระเงิน'}'
+            '\n${ticket.isPaid ? 'ชำระแล้ว · สลิป ${ticket.slipRef}' : 'ยังไม่ชำระเงิน'}'
             '${alreadyToday ? '\nวันนี้บันทึกไว้แล้ว — นับเป็นคนเดิม 1 ครั้ง' : ''}'
             '$offlineNote';
       case GateRejected(:final failure, :final ticket):
@@ -70,6 +70,9 @@ class _ScanTicketPageState extends State<ScanTicketPage> {
           GateFailure.expired =>
             '✕ ตั๋วนี้หมดอายุแล้ว'
                 '${ticket == null ? '' : ' (${ticket.studentName} · หมดเมื่อ ${ticket.expiryTime})'}',
+          GateFailure.unpaid =>
+            '✕ ตั๋วนี้ยังไม่ชำระเงิน — ให้นิสิตแนบสลิปก่อนเข้าใช้'
+                '${ticket == null ? '' : ' (${ticket.studentName} · รหัส ${ticket.code})'}',
         };
     }
 

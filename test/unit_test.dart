@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nu_fitticket/config.dart';
 import 'package:nu_fitticket/models/entry.dart';
 import 'package:nu_fitticket/models/ticket.dart';
 import 'package:nu_fitticket/services/gate_service.dart';
@@ -60,6 +61,130 @@ void main() {
     });
   });
 
+  group('เวลาหมดอายุ = 20:00 ของวันที่จ่าย', () {
+    test('จ่ายบ่าย → หมดอายุ 20:00 วันเดียวกัน', () {
+      expect(
+        ticketExpiryFor(DateTime(2026, 10, 20, 13, 5)),
+        DateTime(2026, 10, 20, 20),
+      );
+      expect(
+        ticketExpiryFor(DateTime(2026, 10, 20, 19, 59)),
+        DateTime(2026, 10, 20, 20),
+      );
+    });
+
+    test('จ่ายหลัง 20:00 → ใช้ได้ถึง 20:00 วันถัดไป', () {
+      expect(
+        ticketExpiryFor(DateTime(2026, 10, 20, 21, 30)),
+        DateTime(2026, 10, 21, 20),
+      );
+    });
+
+    test('ตั๋วที่จ่าย 13:00 ใช้ไม่ได้หลัง 20:00', () {
+      final ticket = Ticket(
+        code: 'AB3K7Q',
+        studentId: '67000001',
+        studentName: 'นิสิตตัวอย่าง',
+        priceCents: 1000,
+        purchasedAt: DateTime(2026, 10, 20, 13).millisecondsSinceEpoch,
+        expiresAt: ticketExpiryFor(
+          DateTime(2026, 10, 20, 13),
+        ).millisecondsSinceEpoch,
+      );
+      expect(ticket.isExpiredAt(DateTime(2026, 10, 20, 19, 59)), isFalse);
+      expect(ticket.isExpiredAt(DateTime(2026, 10, 20, 20, 1)), isTrue);
+    });
+  });
+
+  group('แท็กสถานะการชำระ', () {
+    Entry makeEntry({bool paid = true}) => Entry(
+      id: 'e1',
+      code: 'AB3K7Q',
+      studentId: '67000001',
+      studentName: 'นิสิตตัวอย่าง',
+      priceCents: 1000,
+      ts: DateTime(2026, 10, 20, 13).millisecondsSinceEpoch,
+      date: '2026-10-20',
+      paid: paid,
+    );
+
+    test('ข้อมูลเก่าที่ไม่มีฟิลด์ paid ถือว่าชำระแล้ว', () {
+      final entry = Entry.fromJson({
+        'id': 'e1',
+        'code': 'AB3K7Q',
+        'student_id': '67000001',
+        'student_name': 'นิสิตตัวอย่าง',
+        'price_cents': 1000,
+        'ts': 1790000000000,
+        'date': '2026-10-20',
+      });
+      expect(entry.paid, isTrue);
+    });
+
+    test('บันทึก paid=false ได้ (เดินผ่านประตูโดยยังไม่ชำระ)', () {
+      expect(makeEntry(paid: false).toJson()['paid'], isFalse);
+      expect(makeEntry().toJson()['paid'], isTrue);
+    });
+
+    test('รายงาน CSV มีคอลัมน์สถานะการชำระ', () {
+      final csv = ReportExport.buildCsv([makeEntry(), makeEntry(paid: false)]);
+      expect(csv, contains('สถานะการชำระ'));
+      expect(csv, contains('ชำระแล้ว'));
+      expect(csv, contains('ยังไม่ชำระ'));
+    });
+  });
+
+  group('R4 — ตัดสินใจให้เข้าใช้ที่ประตู', () {
+    Ticket ticketAt({int hoursLeft = 2, String? slipRef = 'SLIP001'}) => Ticket(
+      code: 'AB3K7Q',
+      studentId: '67000001',
+      studentName: 'นิสิตตัวอย่าง',
+      priceCents: 1000,
+      purchasedAt: DateTime(2026, 10, 20, 13).millisecondsSinceEpoch,
+      expiresAt: DateTime(
+        2026,
+        10,
+        20,
+        20,
+      ).add(Duration(hours: hoursLeft)).millisecondsSinceEpoch,
+      slipRef: slipRef,
+    );
+
+    test('ตั๋วชำระแล้วและยังไม่หมดอายุ → ผ่าน', () {
+      expect(
+        GateService.rejectionFor(ticketAt(), DateTime(2026, 10, 20, 15)),
+        isNull,
+      );
+    });
+
+    test('ไม่พบตั๋ว → notFound', () {
+      expect(
+        GateService.rejectionFor(null, DateTime(2026, 10, 20, 15)),
+        GateFailure.notFound,
+      );
+    });
+
+    test('ตั๋วหมดอายุ → expired', () {
+      expect(
+        GateService.rejectionFor(
+          ticketAt(hoursLeft: -6),
+          DateTime(2026, 10, 20, 15),
+        ),
+        GateFailure.expired,
+      );
+    });
+
+    test('ตั๋วที่ยังไม่ชำระเงิน → unpaid (เดินผ่านประตูโดยไม่จ่าย)', () {
+      expect(
+        GateService.rejectionFor(
+          ticketAt(slipRef: null),
+          DateTime(2026, 10, 20, 15),
+        ),
+        GateFailure.unpaid,
+      );
+    });
+  });
+
   group('GateService.dateKey', () {
     test('จัดรูปแบบเป็น yyyy-MM-dd', () {
       expect(GateService.dateKey(DateTime(2026, 10, 8, 23, 59)), '2026-10-08');
@@ -82,7 +207,9 @@ void main() {
       expect(csv.startsWith('\uFEFF'), isTrue);
       expect(
         csv,
-        contains('วันที่,เวลา,รหัสนิสิต,ชื่อ,รหัสตั๋ว,สถานที่,ราคา (บาท)'),
+        contains(
+          'วันที่,เวลา,รหัสนิสิต,ชื่อ,รหัสตั๋ว,สถานะการชำระ,สถานที่,ราคา (บาท)',
+        ),
       );
       expect(csv, contains('67000001'));
       expect(csv, contains('AB3K7Q'));
