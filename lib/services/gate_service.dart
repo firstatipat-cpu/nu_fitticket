@@ -175,9 +175,10 @@ class GateService {
       case GateAccepted(:final ticket, :final alreadyToday):
         return (
           success: true,
-          title: '${ticket.studentName} (${ticket.studentId}) เข้าใช้ได้',
+          title: 'เข้าได้',
           detail:
-              '${ticket.isPaid ? 'ชำระแล้ว · สลิป ${ticket.slipRef}' : 'ยังไม่ชำระเงิน'}'
+              '${ticket.studentName} (${ticket.studentId})'
+              ' · ${ticket.isPaid ? 'ชำระแล้ว · สลิป ${ticket.slipRef}' : 'ยังไม่ชำระเงิน'}'
               '${alreadyToday ? ' · วันนี้บันทึกไว้แล้ว นับเป็นคนเดิม 1 ครั้ง' : ''}'
               '$offlineNote',
         );

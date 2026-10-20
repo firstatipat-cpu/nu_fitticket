@@ -229,12 +229,13 @@ void main() {
       slipRef: slipRef,
     );
 
-    test('ตั๋วชำระแล้ว → เข้าใช้ได้', () {
+    test('ตั๋วชำระแล้ว → เข้าได้', () {
       final shown = GateService.describe(
         GateAccepted(ticket: ticketAt(), alreadyToday: false),
       );
       expect(shown.success, isTrue);
-      expect(shown.title, contains('เข้าใช้ได้'));
+      expect(shown.title, 'เข้าได้');
+      expect(shown.detail, contains('ชำระแล้ว'));
     });
 
     test('ตั๋วยังไม่ชำระ → ยังไม่ชำระเงิน', () {

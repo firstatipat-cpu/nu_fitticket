@@ -77,7 +77,7 @@ class _GateKioskPageState extends State<GateKioskPage> {
     setState(() {
       _result = _KioskResult(
         ok: shown.success,
-        title: shown.success ? 'เข้าได้' : shown.title,
+        title: shown.title,
         detail: shown.detail,
         paid: paid,
       );
