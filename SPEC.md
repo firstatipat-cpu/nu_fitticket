@@ -37,7 +37,7 @@
 **แก้ไข 19 ต.ค. 2569 (โค้ดไม่ compile):** `pubspec.yaml` ถูกเขียนทับเหลือ `flutter` + `cupertino_icons` → ขึ้น error 200+ บรรทัด ทั้งโปรเจกต์ → คืนครบ 16 รายการ (`path` `sqflite` `provider` `image_picker` `qr_flutter` `intl` `mobile_scanner` `http` `crypto` `csv` `path_provider` `share_plus` `flutter_localizations` · `intl` ต้อง pin **0.20.2** เพราะ `flutter_localizations` จาก SDK บังคับ)
 ต่อจากนั้น: สร้าง `lib/screens/ticket_page.dart` คืน · แก้ import `../widgets/nu_header.dart` → `../widget/` · ลบ `register_page copy.dart` (ซ้ำกับ `register_page.dart` ทุกไบต์) · คืน 2 บรรทัดใน `android/gradle.properties` ที่ถูก template ทับ → `flutter build apk --release` ผ่าน
 
-**ยังไม่ได้ทดสอบ:** มือถือ Android จริง 2 เครื่อง (APK release เพิ่ง build — ยังไม่ได้ติดตั้งบนเครื่องจริง) · สแกน QR ด้วยแอปธนาคารจริง · กล้องสแกน QR ตั๋วข้ามอุปกรณ์ (ใช้ทางกรอกรหัสแทน)
+**ยังไม่ได้ทดสอบ:** มือถือ Android จริง 2 เครื่อง (release APK ติดตั้ง+ทดสอบบน emulator แล้ว 21 ต.ค. — ยังไม่ได้ลงมือถือจริง) · สแกน QR ด้วยแอปธนาคารจริง · กล้องสแกน QR ตั๋วข้ามอุปกรณ์ (ใช้ทางกรอกรหัสแทน) · แนบสลิปธนาคารจริง 1 ใบ (ทดสอบซ้ำก่อนนำเสนอ 24 ต.ค.)
 
 ---
 
@@ -223,7 +223,7 @@
 | ของที่ตัดออก | `cupertino_icons` (ไม่ได้ใช้) · เป้าหมาย `web/` (ไม่ได้ build) · เมธอดไม่มีผู้เรียก (`AppState.isStaff` · `SlipInfo.apiType`) · `ios/` ยังเก็บไว้ (ตัดสินใจทีหลังได้) |
 | clone ใหม่ที่ commit ที่ส่ง | `git clone` จาก GitHub → `git checkout d2523f3` → `flutter pub get` → `flutter analyze` = **No issues found** · `flutter test` = **41/41 ผ่าน** (ยืนยันเอง 20 ต.ค. 21:0x จากโค้ดสด ไม่ใช่จากเครื่องที่ทำงานอยู่) |
 | GitHub Release + tag | tag **`submit-2569`** → `d2523f3` · ปล่อย `app-release.apk` (67.3 MB · sign ด้วย release key) ที่ <https://github.com/firstatipat-cpu/nu_fitticket/releases/tag/submit-2569> (20 ต.ค. 21:1x) — ใช้เป็นลิงก์ "ไฟล์ติดตั้ง" ในฟอร์ม 3 |
-| เอกสารรับรองสัดส่วนงาน | จัดทำ `submission/work_split.pdf` (A4 1 หน้า ตารางแบ่งงาน 4 คน + ช่องลงชื่อ/วันที่) + `submission/work_split.html` (ต้นฉบับ) → **ยังรอลงนาม 4 คน + อัปโหลด Drive** เพื่อแนบลิงก์ในฟอร์ม 3 |
+| เอกสารรับรองสัดส่วนงาน | จัดทำ `submission/work_split.pdf` (A4 1 หน้า ตารางแบ่งงาน 4 คน + ช่องลงชื่อ/วันที่) + `submission/work_split.html` (ต้นฉบับ) → ✅ **อัปเดต 21 ต.ค.: ลงชื่อ+วันที่ครบ 4 คน + อัปโหลด Drive (เปิดได้โดยไม่ต้องล็อกอิน) + ใส่ลิงก์ในฟอร์ม 3 แล้ว** |
 | เพิ่ม | CI (`.github/workflows/ci.yml` = analyze + test + format) · `lib/widget/scan_widgets.dart` (ช่องกรอกรหัสสำรองใช้ร่วม 2 หน้า) · ข้อความที่ประตูแสดงรวมที่ `GateService.describe()` จุดเดียว · ปุ่ม "โหมดประตู — เปิดโดยไม่ต้องล็อกอิน" (จำบัญชีเจ้าหน้าที่ไว้บนเครื่อง) · ตั๋วแสดง "ธนาคารผู้ส่ง" |
 | ยังทำไม่ได้ | กันการสร้างตั๋วปลอมจากคนอื่น (ต้อง Firebase Auth + ตรวจฝั่งเซิร์ฟเวอร์) · เปลี่ยน `kPromptPayId` เป็นบัญชีจริงของโรงยิม (ต้องมีเบอร์จริง) |
 
@@ -274,7 +274,7 @@
 | `flutter build apk --release` | ผ่าน → `app-release.apk` 67.3 MB |
 | `android/gradle.properties` | คืน `--enable-native-access=ALL-UNNAMED` + `kotlin.incremental=false` — ก่อนหน้านั้น build ตายด้วย Kotlin "different roots" (cache อยู่ C: โปรเจกต์อยู่ D:) |
 
-หมายเหตุ: ตั๋วทดสอบ `TEST01` + entry `1791612694678-TEST01` ค้างบนคลาวด์ (ลบผ่าน REST ไม่ได้) — รวมไว้ในการเคลียร์ข้อมูลใน Console ก่อนนำเสนอ
+หมายเหตุ: ตั๋วทดสอบ `TEST01` + entry `1791612694678-TEST01` เคยค้างบนคลาวด์ (ลบผ่าน REST ไม่ได้) → **ล้างผ่าน Console เรียบร้อย 20 ต.ค. 19:0x และตรวจซ้ำ 21 ต.ค. = ว่างทั้งหมด**
 
 ---
 
@@ -300,7 +300,7 @@
 ## 11. งานที่เหลือก่อนส่ง
 
 - [x] push GitHub แล้ว (branch `main` = origin/main · hash เต็มดูได้ด้วย `git log -1 --format=%H` — กรอกค่าเดียวกันในฟอร์ม 3) · [x] tag **`submit-2569`** → commit ที่ส่ง + GitHub Release พร้อม `app-release.apk` (อัปโหลดทับ 21 ต.ค. หลังแก้บั๊กหน้าเจ้าหน้าที่)
-- [ ] **ฟอร์ม 3** — กรอกครบ + ติ๊กยืนยัน 8/8 + ใส่ลิงก์เอกสารลงนามแล้ว 20 ต.ค. 21:1x ✅ · **เหลือกด Submit** (ผู้ใช้กดเอง) · ลิงก์เอกสารลงนาม = <https://drive.google.com/file/d/1c0T7uXoyoMKIVn9NyemEkHiSIb5-Rbik/view?usp=sharing> (`work_split.pdf` ลงชื่อ+วันที่ครบ 4 คน · เปิดดูได้โดยไม่ต้องล็อกอิน · ตรวจแล้ว 20 ต.ค.)
+- [ ] **ฟอร์ม 3** — กรอกครบ + ติ๊กยืนยัน 8/8 + ใส่ลิงก์เอกสารลงนามแล้ว 21 ต.ค. 00:3x ✅ (hash ในช่อง = HEAD = tag = `git log -1 --format=%H`) · **เหลือกด Submit** (ผู้ใช้กดเอง) · ลิงก์เอกสารลงนาม = <https://drive.google.com/file/d/1c0T7uXoyoMKIVn9NyemEkHiSIb5-Rbik/view?usp=sharing> (`work_split.pdf` ลงชื่อ+วันที่ครบ 4 คน · เปิดดูได้โดยไม่ต้องล็อกอิน · ตรวจแล้ว 20 ต.ค.)
 - [x] **ฟอร์ม 2** (บันทึกการพบผู้ใช้) ✅ ส่งแล้ว 20 ต.ค. 2569 — พบ 14:00 น. ที่ NU Fitness · ผู้ให้สัมภาษณ์ รัตตกานต์ ตาลวิราช (นักวิชาการโสตทัศนศึกษา กองกิจการนิสิต มหาวิทยาลัยนเรศ) · ข้อความที่กรอก: `submission/forms_checklist.md`
 - [ ] `SUBMISSION.pdf` — export ตาม `SUBMISSION_TEMPLATE.docx` (ตัวจริง) + ลงนามครบ 4 คน + วางที่ราก repo
 - [x] ติดตั้ง **release APK ที่ปล่อยบน Release** ลงอุปกรณ์แล้ว ✅ 21 ต.ค. (emulator · ยืนยันทุกหน้าจอ + QR + โหมดประตู) · [ ] ยังต้องลองบน **มือถือจริง** + ซ้อมเส้นทางกรอกรหัสสำรอง (กล้องอาจไม่พร้อมในห้องสอบ)
@@ -313,7 +313,7 @@
 - [x] **ปรับปรุงตามผลสัมภาษณ์** ✅ 20 ต.ค. (ในขอบเขต R2/R4) — แท็ก **ชำระแล้ว/ยังไม่ชำระ** ทุกหน้าจอ + คอลัมน์ในรายงาน CSV (67310379) · **โหมดประตู** สแกนเอง ไม่ต้องมีคนเฝ้า + ปฏิเสธ/บันทึกคนที่ยังไม่ชำระ + การ์ดนับคนเดินผ่านโดยไม่ชำระ (67314858) · แท็ก/วิดเจียร์แบบเดียวกันทุกหน้าจอ (67317088) · `lib/screens/gate_kiosk_page.dart` (ใหม่) + `lib/widget/payment_badge.dart` (ใหม่)
 - [x] ยืนยันราคา 10 บาท / ชื่อ NU Fitness กับเจ้าหน้าที่ ✅ 20 ต.ค. — ตรงกับ `kTicketPriceCents = 1000` และ `kFacilityName = 'NU Fitness'` ไม่ต้องแก้โค้ด
 - [x] ยืนยัน **กติกาอายุตั๋ว** ✅ 20 ต.ค. — หมดอายุ **20:00 น. ของวันที่จ่าย** (จ่ายหลัง 20:00 = ถึง 20:00 วันถัดไป) → แก้ `config.dart` (`kTicketExpiryHour` + `ticketExpiryFor()`) แทน `kTicketValidity` เดิม 1 วัน · เพิ่มเทสต์ 3 ตัว
-- [x] **ฟอร์ม 1** ✅ 20 ต.ค. · [x] **ฟอร์ม 2** ✅ ส่งแล้ว 20 ต.ค. (พบ 14:00 น. ที่ NU Fitness) · [x] **ฟอร์ม 3** กรอกครบ + ติ๊ก 8/8 แล้ว 20 ต.ค. 21:1x (ยังไม่ Submit — เหลือลิงก์เอกสารลงนาม)
+- [x] **ฟอร์ม 1** ✅ ส่งแล้ว 20 ต.ค. (ส่วนที่ 5 รอลิงก์ใบลงนาม = A1 10 คะแนน) · [x] **ฟอร์ม 2** ✅ ส่งแล้ว 20 ต.ค. (พบ 14:00 น. ที่ NU Fitness) · [x] **ฟอร์ม 3** กรอกครบ + ติ๊ก 8/8 + ใส่ลิงก์เอกสารลงนามแล้ว 21 ต.ค. 00:3x (ยังไม่ Submit — เหลือกด Submit)
 - [ ] **ฟอร์ม 1 ส่วนที่ 5** — ลิงก์ภาพใบลงนามรับทราบของเจ้าหน้าที่ (ยังไม่มี) → A1 = 10 คะแนน · **ส่วนที่ 3 (ข้อมูลผู้ให้สัมภาษณ์) ได้แล้ว**: รัตตกานต์ ตาลวิราช · นักวิชาการโสตทัศนศึกษา · กองกิจการนิสิต มหาวิทยาลัยนเรศ · 080-005-2811 · Rattakant@nu.ac.th
       · เตรียมใบรับทราบไว้ 3 แบบ: `submission/acknowledgment.docx` (อัปโหลด Drive → เปิดด้วย Google Docs → เซ็นในไฟล์) · `submission/acknowledgment.pdf` (พิมพ์เซ็นแล้วสแกน) · `submission/acknowledgment.html` (ต้นฉบับ)
 - [x] **ไม่ต้อง export `SUBMISSION.pdf`** — อาจารย์ระบุชัดว่า "สิ่งที่ส่งจริงคือฟอร์ม 3 ใบเดียว ไม่ต้องจัดทำเอกสารประกอบการส่งใน repository" (ดู `submission/FORM_EXAMPLE (1).docx`) → ตัวอย่างรูปแบบการกรอกอยู่ที่ `submission/forms_checklist.md`
