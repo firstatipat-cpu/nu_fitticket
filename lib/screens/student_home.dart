@@ -40,9 +40,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
       _error = null;
     });
     try {
-      final read = await TicketService.activeOf(
-        context.read<AppState>().account!.login,
-      );
+      final account = context.read<AppState>().account;
+      if (account == null) return; // ออกจากระบบแล้ว — หน้านี้กำลังถูกแทนที่
+      final read = await TicketService.activeOf(account.login);
       if (!mounted) return;
       setState(() {
         _ticket = read.ticket;
@@ -93,7 +93,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final account = context.watch<AppState>().account!;
+    final account = context.watch<AppState>().account;
+    if (account == null) {
+      // ออกจากระบบแล้ว (บัญชีถูกล้างก่อนเปลี่ยนหน้า) — ห้ามแตะ account! ตรงนี้
+      return const Scaffold(body: SizedBox.shrink());
+    }
 
     return Scaffold(
       appBar: AppBar(

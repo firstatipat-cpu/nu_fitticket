@@ -231,33 +231,41 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
           const SizedBox(height: 4),
           Row(
             children: [
-              _StatCard(
-                icon: Icons.confirmation_number,
-                label: 'ตั๋วขายวันนี้',
-                value: '${data.ticketsToday.length} ใบ',
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.confirmation_number,
+                  label: 'ตั๋วขายวันนี้',
+                  value: '${data.ticketsToday.length} ใบ',
+                ),
               ),
               const SizedBox(width: 12),
-              _StatCard(
-                icon: Icons.payments,
-                label: 'ยอดขายวันนี้',
-                value: '${(totalCents / 100).toStringAsFixed(2)} บาท',
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.payments,
+                  label: 'ยอดขายวันนี้',
+                  value: '${(totalCents / 100).toStringAsFixed(2)} บาท',
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              _StatCard(
-                icon: Icons.groups,
-                label: 'คนที่เข้าใช้วันนี้',
-                value: '${data.entriesToday.where((e) => e.paid).length} คน',
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.groups,
+                  label: 'คนที่เข้าใช้วันนี้',
+                  value: '${data.entriesToday.where((e) => e.paid).length} คน',
+                ),
               ),
               const SizedBox(width: 12),
-              _StatCard(
-                icon: Icons.cloud_upload,
-                label: 'รอซิงก์',
-                value: '${data.pending} รายการ',
-                highlight: data.pending > 0,
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.cloud_upload,
+                  label: 'รอซิงก์',
+                  value: '${data.pending} รายการ',
+                  highlight: data.pending > 0,
+                ),
               ),
             ],
           ),
@@ -359,30 +367,30 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = highlight ? AppColors.danger : AppColors.orange;
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: accent, size: 22),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: const TextStyle(color: AppColors.muted, fontSize: 12),
+    // ห้ามห่อ Expanded ที่นี่ — การ์ดใช้ทั้งใน Row และใน ListView
+    // (Expanded นอก Flex ทำให้ทั้งหน้าเป็น ErrorWidget สีเทาในโหมด release)
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: accent, size: 22),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(color: AppColors.muted, fontSize: 12),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                color: highlight ? AppColors.danger : AppColors.ink,
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
               ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: TextStyle(
-                  color: highlight ? AppColors.danger : AppColors.ink,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
