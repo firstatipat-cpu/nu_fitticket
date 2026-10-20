@@ -28,7 +28,7 @@
 | `flutter test` | ✅ ผ่าน 41 เทสต์ |
 | APK debug build + ติดตั้ง + ทดสอบบน emulator | ✅ ผ่าน |
 | APK release build (ติดตั้งบนมือถือ Android ได้) | ✅ `app-release.apk` 67.3 MB — sign ด้วย **release key** ของโปรเจกต์ (`android/key.properties` ไม่อยู่ในรีโป) · แพ็กเกจ `com.nu.fitticket` |
-| Git commit | ✅ 17 commit · push ขึ้น GitHub แล้ว (`firstatipat-cpu/nu_fitticket` · branch `main` = origin/main · hash เต็มดูได้ด้วย `git rev-parse HEAD` — ระบุไว้ในฟอร์ม 3) · tag `submit-2569` + Release พร้อม APK |
+| Git commit | ✅ push ขึ้น GitHub แล้ว (`firstatipat-cpu/nu_fitticket` · branch `main` = origin/main · จำนวน commit + hash เต็มดูได้ด้วย `git log --oneline` / `git rev-parse HEAD` — ระบุไว้ในฟอร์ม 3) · tag `submit-2569` + Release พร้อม APK |
 | เคลียร์ข้อมูลทดสอบบนคลาวด์ | ✅ 20 ต.ค. 19:0x — ลบ `tickets`/`entries`/`slips` ทั้งหมดผ่าน Firebase Console (DB ว่าง เตรียมนำเสนอ) |
 | ฟอร์ม 1/2/3 + SUBMISSION.pdf | 🟡 ฟอร์ม 1 เสร็จ (20 ต.ค.) · **ฟอร์ม 3 กรอกครบทุกส่วนแล้ว 20 ต.ค. 21:1x (ยังไม่กด Submit — เหลือใส่ลิงก์เอกสารลงนาม + ติ๊กกล่อง "ส่งฟอร์ม 2")** · ฟอร์ม 2 + `SUBMISSION.pdf` ยังไม่ทำ |
 | สัมภาษณ์เจ้าหน้าที่โรงยิม (A1) | 🟡 สอบถามราคา/ชื่อสถานที่แล้ว (20 ต.ค. ตรงกับ `config.dart`) · ยังไม่มีใบลงนาม/บันทึกคำให้สัมภาษณ์ |
