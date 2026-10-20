@@ -240,8 +240,8 @@
 | ออกจากระบบ | **พบบั๊ก**: `account!` ที่ `lib/screens/student_home.dart` → error ตอนออกจากระบบ (ใน release แสดงเป็นกล่องสีเทา) → **แก้แล้ว** (commit `e9ea182`) |
 | คลาวด์ | `/tickets` · `/entries` · `/slips` = ว่างทั้งหมด (อ่านแบบ anonymous ได้ 200 → `null`) · กฎ create-only ทำงาน · ไม่มีข้อมูลทดสอบค้างให้ล้างก่อนนำเสนอ |
 | `flutter analyze` · `flutter test` | No issues found · **41/41 ผ่าน** |
-| clone ใหม่ที่ commit ที่ส่ง | `git clone` → `git checkout e9ea182` → `flutter pub get` → `flutter analyze` = **No issues found** · `flutter test` = **41/41 ผ่าน** (ยืนยันเอง 21 ต.ค. จากโค้ดสด) |
-| tag + Release | tag **`submit-2569`** → `e9ea182` · `app-release.apk` อัปโหลดทับแล้ว (sha256 ตรงกับของในเครื่อง) |
+| clone ใหม่ที่ commit ที่ส่ง | `git clone` → `git checkout <commit ที่กรอกในฟอร์ม 3>` → `flutter pub get` → `flutter analyze` = **No issues found** · `flutter test` = **41/41 ผ่าน** (ยืนยันเอง 21 ต.ค. จากโค้ดสด) |
+| tag + Release | tag **`submit-2569`** → commit ที่ส่ง (`git log -1 --format=%H`) · `app-release.apk` อัปโหลดทับแล้ว (sha256 ตรงกับของในเครื่อง) |
 
 **ตรวจซ้ำหลังปรับปรุงตามผลสัมภาษณ์ (20 ต.ค. 2569, 18:00)** — debug APK บน emulator Pixel_9
 | ขั้น | ผลที่ยืนยัน |
@@ -299,7 +299,7 @@
 
 ## 11. งานที่เหลือก่อนส่ง
 
-- [x] push GitHub แล้ว (branch `main` = origin/main · hash เต็มดูได้ด้วย `git rev-parse HEAD` — กรอกในฟอร์ม 3) · [x] tag **`submit-2569`** → `e9ea182bbb4af289282a92a3747d64ebb8551a10` + GitHub Release พร้อม `app-release.apk` (อัปโหลดทับ 21 ต.ค. หลังแก้บั๊กหน้าเจ้าหน้าที่)
+- [x] push GitHub แล้ว (branch `main` = origin/main · hash เต็มดูได้ด้วย `git log -1 --format=%H` — กรอกค่าเดียวกันในฟอร์ม 3) · [x] tag **`submit-2569`** → commit ที่ส่ง + GitHub Release พร้อม `app-release.apk` (อัปโหลดทับ 21 ต.ค. หลังแก้บั๊กหน้าเจ้าหน้าที่)
 - [ ] **ฟอร์ม 3** — กรอกครบ + ติ๊กยืนยัน 8/8 + ใส่ลิงก์เอกสารลงนามแล้ว 20 ต.ค. 21:1x ✅ · **เหลือกด Submit** (ผู้ใช้กดเอง) · ลิงก์เอกสารลงนาม = <https://drive.google.com/file/d/1c0T7uXoyoMKIVn9NyemEkHiSIb5-Rbik/view?usp=sharing> (`work_split.pdf` ลงชื่อ+วันที่ครบ 4 คน · เปิดดูได้โดยไม่ต้องล็อกอิน · ตรวจแล้ว 20 ต.ค.)
 - [x] **ฟอร์ม 2** (บันทึกการพบผู้ใช้) ✅ ส่งแล้ว 20 ต.ค. 2569 — พบ 14:00 น. ที่ NU Fitness · ผู้ให้สัมภาษณ์ รัตตกานต์ ตาลวิราช (นักวิชาการโสตทัศนศึกษา กองกิจการนิสิต มหาวิทยาลัยนเรศ) · ข้อความที่กรอก: `submission/forms_checklist.md`
 - [ ] `SUBMISSION.pdf` — export ตาม `SUBMISSION_TEMPLATE.docx` (ตัวจริง) + ลงนามครบ 4 คน + วางที่ราก repo
@@ -347,13 +347,13 @@
 
 ---
 
-## 13. ลิงก์/ไฟล์สำหรับส่งงาน (20 ต.ค. 2569)
+## 13. ลิงก์/ไฟล์สำหรับส่งงาน (21 ต.ค. 2569)
 
 | อะไร | ที่อยู่ |
 |---|---|
 | ซอร์สโค้ด | <https://github.com/firstatipat-cpu/nu_fitticket> (branch `main`) |
-| คอมมิตที่ส่ง | `e9ea182bbb4af289282a92a3747d64ebb8551a10` (tag `submit-2569`) |
-| ไฟล์ติดตั้ง (APK) | <https://github.com/firstatipat-cpu/nu_fitticket/releases/download/submit-2569/app-release.apk> (67.3 MB · แพ็กเกจ `com.nu.fitticket` · sign ด้วย release key ของโปรเจกต์ · build จาก commit `e9ea182` 21 ต.ค.) |
+| คอมมิตที่ส่ง | tag `submit-2569` → ดู `git log -1 --format=%H` (40 ตัวอักษร · ใส่ค่าเดียวกันในฟอร์ม 3) |
+| ไฟล์ติดตั้ง (APK) | <https://github.com/firstatipat-cpu/nu_fitticket/releases/download/submit-2569/app-release.apk> (67.3 MB · แพ็กเกจ `com.nu.fitticket` · sign ด้วย release key ของโปรเจกต์ · build 21 ต.ค. จาก commit ที่ tag ชี้) |
 | Release | <https://github.com/firstatipat-cpu/nu_fitticket/releases/tag/submit-2569> |
 | เอกสารรับรองสัดส่วนงาน | <https://drive.google.com/file/d/1c0T7uXoyoMKIVn9NyemEkHiSIb5-Rbik/view?usp=sharing> (`submission/work_split.pdf` · A4 1 หน้า · ลงชื่อ+วันที่ครบ 4 คน · เปิดดูได้โดยไม่ต้องล็อกอิน) |
 | กฎ Firebase (ต้อง publish เอง) | `firebase.rules.json` ในรีโโค |
