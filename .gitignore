@@ -18,6 +18,9 @@ memory.md
 PROJECT_SUMMARY.md
 task.md
 
+# เอกสารส่งงาน + ลายเซ็น (ข้อมูลส่วนบุคคล) — เก็บไว้ในเครื่อง อัปโหลดขึ้น Drive เอง
+submission/
+
 
 # IntelliJ related
 *.iml
