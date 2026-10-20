@@ -1,5 +1,5 @@
 name: nu_fitticket
-description: "A new Flutter project."
+description: "NU FitTicket — แอปซื้อตั๋วเข้าใช้ NU Fitness: QR พร้อมเพย์ + ตรวจสลิป + ประตูสแกนตั๋ว"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,7 +35,6 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^2.0.0
   path: ^1.9.1
   sqflite: ^2.4.4+2
   provider: ^6.1.5+1

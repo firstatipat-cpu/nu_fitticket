@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -38,12 +40,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
       _error = null;
     });
     try {
-      final ticket = await TicketService.activeOf(
+      final read = await TicketService.activeOf(
         context.read<AppState>().account!.login,
       );
       if (!mounted) return;
       setState(() {
-        _ticket = ticket;
+        _ticket = read.ticket;
         _loading = false;
       });
     } catch (e) {
@@ -82,9 +84,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
     if (!mounted || ok != true) return;
     context.read<AppState>().signOut();
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+    unawaited(
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage())),
+    );
   }
 
   @override
@@ -158,7 +162,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         icon: const Icon(Icons.confirmation_number),
-                        label: const Text('ซื้อตั๋ว 10 บาท'),
+                        label: Text(
+                          'ซื้อตั๋ว ${(kTicketPriceCents / 100).toStringAsFixed(0)} บาท',
+                        ),
                         onPressed: _buy,
                       ),
                     ],

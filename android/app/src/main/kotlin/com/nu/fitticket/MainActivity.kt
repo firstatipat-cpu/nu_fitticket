@@ -1,4 +1,4 @@
-package com.example.nu_fitticket
+package com.nu.fitticket
 
 import io.flutter.embedding.android.FlutterActivity
 

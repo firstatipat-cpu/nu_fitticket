@@ -60,6 +60,15 @@ class Queries {
     return rows.isEmpty ? null : rows.first['json'] as String;
   }
 
+  /// ทุกแถวในแคชที่ขึ้นต้นด้วย [prefix] (เช่น '/tickets/') — ใช้รวมรายการที่เขียนแต่ละคีย์
+  /// เข้าไปกับข้อมูลของโหนดตอนออฟไลน์
+  static Future<List<Map<String, Object?>>> cacheRowsWithPrefix(
+    String prefix,
+  ) async {
+    final db = await AppDatabase.instance.database;
+    return db.query('cache', where: 'key LIKE ?', whereArgs: ['$prefix%']);
+  }
+
   // ---- outbox ----
 
   static Future<void> outboxAdd({

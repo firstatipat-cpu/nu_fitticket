@@ -14,20 +14,13 @@ const _bankNames = <String, String>{
 
 /// ผลการอ่านสลิปที่ผ่านการตรวจ
 class SlipInfo {
-  const SlipInfo({
-    required this.reference,
-    required this.sendingBankCode,
-    required this.apiType,
-  });
+  const SlipInfo({required this.reference, required this.sendingBankCode});
 
   /// เลขที่รายการบนสลิป — ใช้เป็นคีย์กันสลิปซ้ำ
   final String reference;
 
   /// รหัสธนาคารผู้ส่ง (รหัสธนาคารตามมาตรฐาน ธปท.)
   final String sendingBankCode;
-
-  /// ชนิด API ของสลิป (ปัจจุบันมีค่าเดียว)
-  final String apiType;
 
   /// ชื่อธนาคารผู้ส่ง (ถ้ารู้จัก)
   String get bankName =>
@@ -105,11 +98,7 @@ class SlipParser {
     }
 
     return SlipAccepted(
-      SlipInfo(
-        reference: reference.trim(),
-        sendingBankCode: bankCode,
-        apiType: apiType!,
-      ),
+      SlipInfo(reference: reference.trim(), sendingBankCode: bankCode),
     );
   }
 

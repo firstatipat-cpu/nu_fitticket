@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../db/schema.dart';
 import '../models/account.dart';
 import '../services/auth_service.dart';
 import '../state/app_state.dart';
@@ -27,11 +30,36 @@ class _LoginPageState extends State<LoginPage> {
   bool _busy = false;
   String? _error;
 
+  /// บัญชีเจ้าหน้าที่ที่เคยล็อกอินบนเครื่องนี้ (ใช้เปิดโหมดประตูได้โดยไม่ต้องล็อกอิน)
+  Account? _remembered;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRemembered();
+  }
+
+  Future<void> _loadRemembered() async {
+    final account = await AuthService.rememberedStaff();
+    if (!mounted) return;
+    setState(() => _remembered = account);
+  }
+
   @override
   void dispose() {
     _id.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  /// เปิดโหมดประตูโดยไม่ต้องใส่รหัสผ่าน (เครื่องประตูเป็นของโรงยิมที่ล็อกอินไว้แล้ว)
+  void _openKiosk() {
+    final account = _remembered;
+    if (account == null) return;
+    context.read<AppState>().signIn(account);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const StaffDashboardPage()),
+    );
   }
 
   Future<void> _submit() async {
@@ -56,11 +84,18 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       context.read<AppState>().signIn(account);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => account.isStaff
-              ? const StaffDashboardPage()
-              : const StudentHomePage(),
+      if (account.isStaff) {
+        // จำบัญชีไว้บนเครื่องนี้ เพื่อเปิดโหมดประตูได้โดยไม่ต้องล็อกอินทุกครั้ง
+        await AuthService.rememberStaff(account);
+        if (!mounted) return;
+      }
+      unawaited(
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => account.isStaff
+                ? const StaffDashboardPage()
+                : const StudentHomePage(),
+          ),
         ),
       );
     } catch (e) {
@@ -167,6 +202,36 @@ class _LoginPageState extends State<LoginPage> {
                           )
                         : const Text('เข้าสู่ระบบ'),
                   ),
+                  if (_remembered != null) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.phonelink_ring),
+                      label: const Text('โหมดประตู — เปิดโดยไม่ต้องล็อกอิน'),
+                      onPressed: _busy ? null : _openKiosk,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'เครื่องนี้เคยล็อกอินเป็น ${_remembered!.name} — ใช้เปิดโหมดประตูได้เลย',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                  if (_staffMode) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'บัญชีทดสอบ ${Schema.seedStaffLogin} / ${Schema.seedPassword} '
+                      '— ใช้สาธิตเท่านั้น เปลี่ยนก่อนใช้งานจริง',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.orangeDark,
+                        fontSize: 11,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                   if (!_staffMode)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),

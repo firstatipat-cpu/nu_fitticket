@@ -20,28 +20,31 @@ class ReportExport {
   ) async {
     final startMs = start.millisecondsSinceEpoch;
     final endMs = end.millisecondsSinceEpoch;
-    final all = await CloudService.entries();
-    final inRange = all
+    final read = await CloudService.entries();
+    final inRange = read.data
         .where((entry) => entry.ts >= startMs && entry.ts < endMs)
         .toList();
     inRange.sort((a, b) => b.ts.compareTo(a.ts));
     return inRange;
   }
 
+  /// หัวตารางของไฟล์ CSV (ใช้กับทั้งไฟล์ที่ส่งออกและข้อความบอกผู้ใช้ในแอป)
+  static const csvColumns = <String>[
+    'วันที่',
+    'เวลา',
+    'รหัสนิสิต',
+    'ชื่อ',
+    'รหัสตั๋ว',
+    'สถานะการชำระ',
+    'สถานที่',
+    'ราคา (บาท)',
+  ];
+
   static String buildCsv(List<Entry> entries) {
     final date = DateFormat('yyyy-MM-dd');
     final time = DateFormat('HH:mm');
     final rows = <List<Object?>>[
-      [
-        'วันที่',
-        'เวลา',
-        'รหัสนิสิต',
-        'ชื่อ',
-        'รหัสตั๋ว',
-        'สถานะการชำระ',
-        'สถานที่',
-        'ราคา (บาท)',
-      ],
+      csvColumns,
       for (final entry in entries)
         [
           date.format(entry.time),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -68,15 +70,28 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
           });
         case SlipAccepted(:final info):
           final account = context.read<AppState>().account!;
-          final ticket = await TicketService.issue(
+          final result = await TicketService.issue(
             studentId: account.login,
             studentName: account.name,
             code: _code,
             slipRef: info.reference,
+            bankName: info.bankName,
           );
           if (!mounted) return;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => TicketPage(ticket: ticket)),
+          if (result.error != null || result.ticket == null) {
+            setState(() {
+              _busy = false;
+              _failed = true;
+              _error = result.error ?? 'ออกตั๋วไม่สำเร็จ';
+            });
+            return;
+          }
+          unawaited(
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => TicketPage(ticket: result.ticket!),
+              ),
+            ),
           );
       }
     } catch (e) {
@@ -145,7 +160,7 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
               ),
             ),
           ),
-          if (isPromptPaySample || PromptPay.idError(kPromptPayId) != null) ...[
+          if (PromptPay.idError(kPromptPayId) != null) ...[
             const SizedBox(height: 12),
             Card(
               color: AppColors.orange.withValues(alpha: 0.10),

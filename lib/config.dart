@@ -33,10 +33,12 @@ DateTime ticketExpiryFor(DateTime purchasedAt) {
 /// (ค่าคงที่นี้ไม่ใช่ความลับ — เบอร์พร้อมเพย์เปิดเผยได้)
 const String kPromptPayId = '0630921644';
 
-/// ค่า placeholder เดิม — ใช้เทียบเพื่อเตือนว่ายังไม่ได้เปลี่ยนเป็นบัญชีจริง
-const String kPromptPaySampleId = '0899999999';
+/// เบอร์ที่ถือว่า "ยังไม่ใช่ของโรงยิมจริง" — ใช้เตือนผู้ดูแลระบบก่อนสาธิต
+/// (ค่าคงที่เหล่านี้เปิดเผยได้ ไม่ใช่ความลับ)
+const Set<String> kPromptPayTestIds = {'0899999999', '0630921644'};
+
 const String kPromptPayName = 'NU FITNESS';
 const String kPromptPayCity = 'PHITSANULOK';
 
-/// true = ยังใช้เบอร์ตัวอย่างอยู่ ควรเปลี่ยนก่อนสาธิต
-bool get isPromptPaySample => kPromptPayId == kPromptPaySampleId;
+/// true = ยังใช้เบอร์ทดสอบอยู่ ควรเปลี่ยนเป็นบัญชีของโรงยิมก่อนใช้งานจริง
+bool get isPromptPaySample => kPromptPayTestIds.contains(kPromptPayId);

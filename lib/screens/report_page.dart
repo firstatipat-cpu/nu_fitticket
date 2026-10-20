@@ -47,15 +47,23 @@ class _ReportPageState extends State<ReportPage> {
       _busy = true;
       _error = null;
     });
-    final entries = await ReportExport.entriesBetween(
-      _range.start,
-      _endExclusive,
-    );
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _count = entries.length;
-    });
+    try {
+      final entries = await ReportExport.entriesBetween(
+        _range.start,
+        _endExclusive,
+      );
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _count = entries.length;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = 'อ่านข้อมูลรายงานไม่สำเร็จ: $e';
+      });
+    }
   }
 
   Future<void> _export() async {
@@ -129,9 +137,9 @@ class _ReportPageState extends State<ReportPage> {
             Text(_error!, style: const TextStyle(color: AppColors.danger)),
           ],
           const SizedBox(height: 24),
-          const Text(
-            'ไฟล์ CSV มีคอลัมน์: วันที่, เวลา, รหัสนิสิต, ชื่อ, รหัสตั๋ว, สถานที่, ราคา (บาท)',
-            style: TextStyle(color: AppColors.muted, fontSize: 12),
+          Text(
+            'ไฟล์ CSV มีคอลัมน์: ${ReportExport.csvColumns.join(' · ')}',
+            style: const TextStyle(color: AppColors.muted, fontSize: 12),
           ),
         ],
       ),

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/entry.dart';
 import '../models/ticket.dart';
+import '../config.dart';
 import '../services/cloud_service.dart';
 import '../services/gate_service.dart';
 import '../state/app_state.dart';
@@ -96,17 +99,16 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
     final today = GateService.dateKey(now);
 
     final tickets = await CloudService.tickets();
-    // สแลปธงออฟไลน์หลังอ่านแต่ละโหนด — ไม่งั้นรอบที่สำเร็จทีหลังจะล้างธงของรอบที่ล้ม
-    final ticketsOffline = CloudService.lastReadOffline;
+    // ธงออฟไลน์มาจากผลของการอ่านแต่ละโหนด ไม่ใช่ตัวแปรส่วนกลาง (รอบที่สำเร็จทีหลังจะไม่ล้างธงของรอบก่อน)
     final entries = await CloudService.entries();
 
     return _DashData(
-      ticketsToday: tickets
+      ticketsToday: tickets.data
           .where((t) => t.purchasedAt >= startMs && t.purchasedAt < endMs)
           .toList(),
-      entriesToday: entries.where((e) => e.date == today).toList(),
+      entriesToday: entries.data.where((e) => e.date == today).toList(),
       pending: await CloudService.pendingCount(),
-      offline: ticketsOffline || CloudService.lastReadOffline,
+      offline: tickets.offline || entries.offline,
     );
   }
 
@@ -130,9 +132,11 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
     );
     if (!mounted || ok != true) return;
     context.read<AppState>().signOut();
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+    unawaited(
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage())),
+    );
   }
 
   @override
@@ -225,6 +229,30 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                 ),
               ),
             ),
+          if (isPromptPaySample)
+            Card(
+              color: AppColors.danger.withValues(alpha: 0.10),
+              child: const Padding(
+                padding: EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber, color: AppColors.danger),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'ยังตั้งบัญชีรับเงินเป็นเบอร์ทดสอบ — '
+                        'เปลี่ยน kPromptPayId ใน lib/config.dart เป็นบัญชีของโรงยิมก่อนใช้งานจริง',
+                        style: TextStyle(
+                          color: AppColors.danger,
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           const SizedBox(height: 4),
           Row(
             children: [
@@ -276,7 +304,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     await Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ScanTicketPage()),
                     );
-                    _load();
+                    unawaited(_load());
                   },
                 ),
               ),
@@ -302,7 +330,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const GateKioskPage()),
                 );
-                _load();
+                unawaited(_load());
               },
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -67,8 +69,10 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
       context.read<AppState>().signIn(account);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const StudentHomePage()),
+      unawaited(
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const StudentHomePage()),
+        ),
       );
     } catch (e) {
       if (!mounted) return;

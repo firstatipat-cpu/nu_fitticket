@@ -35,12 +35,12 @@ class _HistoryPageState extends State<HistoryPage> {
       _error = null;
     });
     try {
-      final tickets = await TicketService.ofStudent(
+      final read = await TicketService.ofStudent(
         context.read<AppState>().account!.login,
       );
       if (!mounted) return;
       setState(() {
-        _tickets = tickets;
+        _tickets = read.tickets;
         _loading = false;
       });
     } catch (e) {

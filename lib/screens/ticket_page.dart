@@ -120,6 +120,8 @@ class TicketPage extends StatelessWidget {
                   ),
                   if (ticket.slipRef != null)
                     _Row(label: 'เลขที่รายการ', value: ticket.slipRef!),
+                  if (ticket.bankName != null)
+                    _Row(label: 'ธนาคารผู้ส่ง', value: ticket.bankName!),
                   _Row(
                     label: 'ซื้อเมื่อ',
                     value: format.format(ticket.purchasedTime),

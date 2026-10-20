@@ -9,6 +9,7 @@ class Ticket {
     required this.purchasedAt,
     required this.expiresAt,
     this.slipRef,
+    this.bankName,
   });
 
   final String code;
@@ -20,6 +21,9 @@ class Ticket {
 
   /// เลขที่รายการของสลิปที่ใช้ยืนยันการโอน (null = ยังไม่ยืนยัน)
   final String? slipRef;
+
+  /// ธนาคารผู้ส่งของสลิป (null = ไม่ทราบ/ยังไม่ยืนยัน) — เช่น "ธ.กสิกรไทย (KBank)"
+  final String? bankName;
 
   bool get isPaid => slipRef != null;
 
@@ -37,6 +41,7 @@ class Ticket {
     'purchased_at': purchasedAt,
     'expires_at': expiresAt,
     if (slipRef != null) 'slip_ref': slipRef,
+    if (bankName != null) 'bank_name': bankName,
   };
 
   factory Ticket.fromJson(Map<String, Object?> json) => Ticket(
@@ -47,6 +52,7 @@ class Ticket {
     purchasedAt: (json['purchased_at']! as num).toInt(),
     expiresAt: (json['expires_at']! as num).toInt(),
     slipRef: json['slip_ref'] as String?,
+    bankName: json['bank_name'] as String?,
   );
 
   /// สร้างจากโหนดของ Realtime Database (คีย์ของโหนดคือ code)

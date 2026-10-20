@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../services/cloud_service.dart';
 import '../services/gate_service.dart';
 import '../theme/app_theme.dart';
+import '../widget/scan_widgets.dart';
 
 /// R4 — สแกน QR ตั๋ว หรือกรอกรหัสสำรอง แล้วบันทึกการเข้าใช้
 /// เจ้าของ: <67314858>
@@ -43,42 +43,17 @@ class _ScanTicketPageState extends State<ScanTicketPage> {
       // กล้องอาจไม่ได้เปิดอยู่ (โหมดกรอกรหัส) — ไม่เป็นไร
     }
 
-    final result = await GateService.checkIn(code);
+    final outcome = await GateService.checkIn(code);
     if (!mounted) return;
 
-    // อ่านจากคลาวด์ไม่สำเร็จ = สรุปผลจากข้อมูลในเครื่อง อาจไม่ครบ
-    final offlineNote = CloudService.lastReadOffline
-        ? '\n(ออฟไลน์อยู่ — ตรวจจากข้อมูลในเครื่องเท่านั้น)'
-        : '';
-
-    final String message;
-    final bool success;
-    switch (result) {
-      case GateAccepted(:final ticket, :final alreadyToday):
-        success = true;
-        message =
-            '✓ ${ticket.studentName} (${ticket.studentId}) เข้าใช้ได้'
-            '\n${ticket.isPaid ? 'ชำระแล้ว · สลิป ${ticket.slipRef}' : 'ยังไม่ชำระเงิน'}'
-            '${alreadyToday ? '\nวันนี้บันทึกไว้แล้ว — นับเป็นคนเดิม 1 ครั้ง' : ''}'
-            '$offlineNote';
-      case GateRejected(:final failure, :final ticket):
-        success = false;
-        message = switch (failure) {
-          GateFailure.notFound =>
-            '✕ ไม่พบตั๋วรหัส $code — ตรวจรหัสอีกครั้ง'
-                '$offlineNote',
-          GateFailure.expired =>
-            '✕ ตั๋วนี้หมดอายุแล้ว'
-                '${ticket == null ? '' : ' (${ticket.studentName} · หมดเมื่อ ${ticket.expiryTime})'}',
-          GateFailure.unpaid =>
-            '✕ ตั๋วนี้ยังไม่ชำระเงิน — ให้นิสิตแนบสลิปก่อนเข้าใช้'
-                '${ticket == null ? '' : ' (${ticket.studentName} · รหัส ${ticket.code})'}',
-        };
-    }
+    final shown = GateService.describe(
+      outcome.result,
+      offline: outcome.offline,
+    );
 
     setState(() {
-      _message = message;
-      _success = success;
+      _message = '${shown.success ? '✓' : '✕'} ${shown.title}\n${shown.detail}';
+      _success = shown.success;
     });
   }
 
@@ -197,19 +172,10 @@ class _ScanTicketPageState extends State<ScanTicketPage> {
           const Divider(height: 32),
           const Text('วิธีสำรอง: กรอกรหัสตั๋ว'),
           const SizedBox(height: 8),
-          TextField(
+          ManualCodeField(
             controller: _manual,
             enabled: !_locked,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
-              labelText: 'รหัสตั๋ว 6 ตัว (เช่น AB3K7Q)',
-              prefixIcon: Icon(Icons.keyboard),
-            ),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: _locked ? null : () => _check(_manual.text),
-            child: const Text('ตรวจรหัสตั๋ว'),
+            onSubmit: _check,
           ),
         ],
       ),

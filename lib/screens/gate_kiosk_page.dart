@@ -6,6 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../services/gate_service.dart';
 import '../theme/app_theme.dart';
 import '../widget/payment_badge.dart';
+import '../widget/scan_widgets.dart';
 
 /// R4 — โหมดประตู: ตั้งเครื่องไว้ที่ประตู นิสิตสแกน QR ตัวเอง ไม่ต้องมีเจ้าหน้าที่นั่งเฝ้า
 /// เจ้าของ: <67314858>
@@ -22,7 +23,6 @@ class _KioskResult {
     required this.title,
     required this.detail,
     this.paid,
-    this.note,
   });
 
   final bool ok;
@@ -31,7 +31,6 @@ class _KioskResult {
 
   /// null = ไม่เกี่ยวกับการชำระเงิน (เช่น ไม่พบตั๋ว)
   final bool? paid;
-  final String? note;
 }
 
 class _GateKioskPageState extends State<GateKioskPage> {
@@ -62,48 +61,26 @@ class _GateKioskPageState extends State<GateKioskPage> {
       // กล้องอาจไม่ได้เปิดอยู่ — ไม่เป็นไร
     }
 
-    final result = await GateService.checkIn(code);
+    final outcome = await GateService.checkIn(code);
     if (!mounted) return;
 
-    final _KioskResult shown;
-    switch (result) {
-      case GateAccepted(:final ticket, :final alreadyToday):
-        shown = _KioskResult(
-          ok: true,
-          title: 'เข้าได้',
-          detail: '${ticket.studentName} · ${ticket.studentId}',
-          paid: true,
-          note: alreadyToday
-              ? 'วันนี้บันทึกไว้แล้ว — นับเป็นคนเดิม 1 ครั้ง'
-              : null,
-        );
-      case GateRejected(:final failure, :final ticket):
-        shown = switch (failure) {
-          GateFailure.notFound => _KioskResult(
-            ok: false,
-            title: 'ไม่พบตั๋ว',
-            detail: 'รหัส $code — ให้ลองสแกนใหม่',
-          ),
-          GateFailure.expired => _KioskResult(
-            ok: false,
-            title: 'ตั๋วหมดอายุ',
-            detail: ticket == null
-                ? ''
-                : '${ticket.studentName} · หมดเมื่อ ${ticket.expiryTime}',
-          ),
-          GateFailure.unpaid => _KioskResult(
-            ok: false,
-            title: 'ยังไม่ชำระเงิน',
-            detail: ticket == null
-                ? 'ให้นิสิตแนบสลิปในแอปก่อนเข้าใช้'
-                : '${ticket.studentName} · ให้แนบสลิปก่อนเข้าใช้',
-            paid: false,
-          ),
-        };
-    }
+    final shown = GateService.describe(
+      outcome.result,
+      offline: outcome.offline,
+    );
+    final paid = switch (outcome.result) {
+      GateAccepted(:final ticket) => ticket.isPaid,
+      GateRejected(:final failure) =>
+        failure == GateFailure.unpaid ? false : null,
+    };
 
     setState(() {
-      _result = shown;
+      _result = _KioskResult(
+        ok: shown.success,
+        title: shown.success ? 'เข้าได้' : shown.title,
+        detail: shown.detail,
+        paid: paid,
+      );
       _busy = false;
     });
 
@@ -170,20 +147,11 @@ class _GateKioskPageState extends State<GateKioskPage> {
             ),
           ),
           const SizedBox(height: 16),
-          TextField(
+          ManualCodeField(
             controller: _manual,
             enabled: !_busy,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
-              labelText: 'กรอกรหัสตั๋วสำรอง (6 ตัว)',
-              prefixIcon: Icon(Icons.keyboard),
-            ),
-            onSubmitted: _handle,
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: _busy ? null : () => _handle(_manual.text),
-            child: const Text('ตรวจรหัสตั๋ว'),
+            onSubmit: _handle,
+            hint: 'กรอกรหัสตั๋วสำรอง (6 ตัว)',
           ),
         ],
       ),
@@ -239,14 +207,6 @@ class _GateKioskPageState extends State<GateKioskPage> {
             if (result?.paid != null) ...[
               const SizedBox(height: 10),
               PaymentBadge(paid: result!.paid!),
-            ],
-            if (result?.note != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                result!.note!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.muted, fontSize: 12),
-              ),
             ],
           ],
         ),

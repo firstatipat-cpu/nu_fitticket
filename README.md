@@ -1,11 +1,14 @@
 # NU FitTicket
 
+![CI](https://github.com/firstatipat-cpu/nu_fitticket/actions/workflows/ci.yml/badge.svg)
+
 แอปซื้อตั๋วเข้าใช้ **NU Fitness** — นิสิตซื้อตั๋ว 10 บาทในแอป (ใช้ได้ถึง 20:00 น. ของวันที่จ่าย) แล้วโชว์ QR ให้เจ้าหน้าที่สแกนตอนเข้าใช้
 
 > สถานะงาน ข้อกำหนด สถาปัตยกรรม และข้อจำกัดทั้งหมดอยู่ที่ **[SPEC.md](SPEC.md)**
 > รีโป: https://github.com/firstatipat-cpu/nu_fitticket
 
 โครงงานรายวิชา Mobile Application Development (กลุ่ม 4 คน) — Flutter
+แพ็กเกจแอป: `com.nu.fitticket` · เทสต์อัตโนมัติ 41 รายการ · CI: `flutter analyze` + `flutter test` ทุกครั้งที่ push
 
 ## สองบทบาทในแอปเดียว
 
@@ -48,7 +51,17 @@ flutter build apk --release   # build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ติดตั้งด้วยการส่งไฟล์เข้าเครื่องแล้วกดเปิด (อนุญาต "ติดตั้งจากแหล่งที่ไม่รู้จัก") หรือ `adb install app-release.apk`
-APK นี้ sign ด้วย debug keystore — ใช้ sideload/เดโมได้ ใช้ขึ้น Play Store ไม่ได้
+
+**คีย์สำหรับ build release** (ไฟล์คีย์ไม่อยู่ในรีโป — ไฟล์ `android/key.properties` + `android/*.jks` ถูก `.gitignore`) สร้างครั้งเดียวแล้วใช้ได้ทุก build:
+
+```bash
+keytool -genkeypair -v -keystore android/nu-fitticket-release.jks -storetype JKS \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias nu-fitticket
+# แล้วสร้าง android/key.properties (ไม่ต้องมี BOM ตอนบันทึก):
+#   storePassword=… / keyPassword=… / keyAlias=nu-fitticket / storeFile=../nu-fitticket-release.jks
+```
+
+ถ้าไม่มี `android/key.properties` Gradle จะใช้ debug key ไปก่อน (build ได้ แต่**อัปเดตแอปที่ติดตั้งไว้เดิมไม่ได้**) · เก็บสำเนาคีย์ไว้นอกรีโป — หายแล้วต้องถอนแอปแล้วติดตั้งใหม่
 
 ## การชำระเงิน (ทำงานจริง)
 
@@ -80,7 +93,9 @@ APK นี้ sign ด้วย debug keystore — ใช้ sideload/เดโ�
 >
 > **กฎนี้กันอะไรได้ / ไม่ได้:** กันการลบและแก้ทับ (ลบสลิปเพื่อใช้ซ้ำ · ยกเลิกตั๋ว · แก้บันทึกเข้าใช้)
 > แต่ **ยังกันการ "สร้างของปลอมใหม่" ไม่ได้** — คนที่รู้ URL ยัง POST ตั๋วหรือสลิปใหม่ได้เอง
-> การกันจุดนั้นต้องมี Firebase Auth + Cloud Functions ตรวจฝั่งเซิร์ฟเวอร์ ซึ่งนอกขอบเขตงานนี้
+> (เช่น สร้างตั๋วปลอมแล้วสแกนเข้าประตูได้ฟรี) การกันจุดนั้นต้องมี Firebase Auth + Cloud Functions
+> ตรวจฝั่งเซิร์ฟเวอร์ ซึ่งนอกขอบเขตงานนี้ → **ฐานข้อมูลของโปรเจกต์นี้เปิดสาธารณะ ให้ถือเป็นฐานข้อมูลเดโม**
+> และ**ลบข้อมูลทดสอบใน Console ก่อนนำเสนอ** (ลบผ่าน REST ไม่ได้ ติดกฎ create-only)
 
 ## บัญชีทดสอบ
 
@@ -92,7 +107,7 @@ APK นี้ sign ด้วย debug keystore — ใช้ sideload/เดโ�
 ## เทสต์
 
 ```bash
-flutter test   # ตอนนี้ 32 เทสต์ — ต้องผ่านทั้งหมด
+flutter test   # ตอนนี้ 41 เทสต์ — ต้องผ่านทั้งหมด
 ```
 
 ## โครงสร้างไฟล์ (แยกตามเจ้าของ)
@@ -101,7 +116,7 @@ flutter test   # ตอนนี้ 32 เทสต์ — ต้องผ่า
 |---|---|---|
 | 1 — ซื้อตั๋ว + QR ชำระ | 67310379 | `lib/screens/buy_ticket_page.dart` · `lib/services/promptpay.dart` · `lib/services/ticket_service.dart` |
 | 2 — ล็อกอิน + หน้าตั๋ว + ธีม | 67317088 | `lib/screens/login_page.dart` · `register_page.dart` · `student_home.dart` · `ticket_page.dart` · `lib/services/auth_service.dart` · `password.dart` · `lib/state/` · `lib/theme/` · `lib/widget/` |
-| 3 — เจ้าหน้าที่ + สแกน + CSV | 67314858 | `lib/screens/staff_dashboard.dart` · `scan_ticket_page.dart` · `gate_kiosk_page.dart` · `report_page.dart` · `lib/services/gate_service.dart` · `slip_parser.dart` · `report_export.dart` |
+| 3 — เจ้าหน้าที่ + สแกน + CSV | 67314858 | `lib/screens/staff_dashboard.dart` · `scan_ticket_page.dart` · `gate_kiosk_page.dart` · `report_page.dart` · `lib/services/gate_service.dart` · `slip_parser.dart` · `report_export.dart` · `lib/widget/scan_widgets.dart` |
 | 4 — ชั้นข้อมูล + คลาวด์ | 67316807 | `lib/db/` · `lib/services/cloud_service.dart` · `lib/models/` · `lib/screens/history_page.dart` · `lib/config.dart` · `test/` |
 
 ## ข้อจำกัด (เขียนไว้ตรง ๆ ไม่ให้เข้าใจผิด)
@@ -117,4 +132,11 @@ flutter test   # ตอนนี้ 32 เทสต์ — ต้องผ่า
 6. **ออฟไลน์อาจออกตั๋วให้สลิปที่ถูกใช้แล้วได้** — ตรวจสลิปตอนออฟไลน์อ่านได้แค่แคชในเครื่อง
    ตอนซิงก์คลาวด์จะปฏิเสธสลิปซ้ำ แต่ตั๋วที่ออกไปแล้วแก้สถานะกลับไม่ได้
 7. **สแกนพร้อมกันเป๊ะ ๆ อาจซ้ำได้** — บันทึกการเข้าใช้เป็น read-then-write
-   มีโอกาสนับคนซ้ำเล็กน้อย
+   มีโอกาสนับคนซ้ำเล็กน้อย (ระบบกันด้วย id คงที่รายคนต่อวัน — ถ้าชนจะเขียนแถวเดียวกัน ไม่เกิดสองแถว)
+8. **บัญชีผู้ใช้เก็บในเครื่องเท่านั้น ไม่ซิงก์ขึ้นคลาวด์** — นิสิตที่สมัครบนเครื่องหนึ่ง
+   ล็อกอินเครื่องอื่นไม่ได้ (ทุกเครื่องมีบัญชีทดสอบ `staff01` / `67000001` ให้ใช้สาธิต)
+   เหตุผลที่ไม่ย้ายขึ้นคลาวด์: ฐานข้อมูลเปิดอ่านได้ทุกคน + กฎ create-only แก้/ลบบัญชีไม่ได้
+9. **โหมดประตู "ตรวจจับ" ได้ แต่ "กันทางกายภาพ" ไม่ได้** — แอปบอกได้ว่าใครเดินผ่านโดยยังไม่ชำระ
+   แต่คนเดินผ่านประตูโดยไม่สแกนยังผ่านไปได้ ถ้าไม่มีประตู/ไม้กั้นของโรงยิม
+10. **ฐานข้อมูลเปิดสาธารณะ** — ใครรู้ URL ก็อ่านข้อมูลทุกคนได้ และสร้างตั๋วปลอมไว้สแกนเข้าประตูได้
+   → ให้ถือเป็นฐานข้อมูลเดโม และลบข้อมูลทดสอบก่อนนำเสนอ (ดูหัวข้อกฎ Firebase)

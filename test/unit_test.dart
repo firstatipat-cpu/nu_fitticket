@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nu_fitticket/config.dart';
 import 'package:nu_fitticket/models/entry.dart';
 import 'package:nu_fitticket/models/ticket.dart';
+import 'package:nu_fitticket/services/auth_service.dart';
 import 'package:nu_fitticket/services/gate_service.dart';
 import 'package:nu_fitticket/services/password.dart';
 import 'package:nu_fitticket/services/promptpay.dart';
@@ -183,6 +184,96 @@ void main() {
         GateFailure.unpaid,
       );
     });
+  });
+
+  group('สมัครบัญชี — ตรวจรูปแบบข้อมูล', () {
+    String? check({
+      String id = '67000001',
+      String name = 'นิสิต',
+      String pass = 'test1234',
+    }) => AuthService.validateInput(studentId: id, name: name, password: pass);
+
+    test('ข้อมูลถูกต้อง → ผ่าน', () {
+      expect(check(), isNull);
+    });
+
+    test('รหัสนิสิตไม่ครบ 8 หลัก → ไม่ผ่าน', () {
+      expect(check(id: '6700000'), isNotNull);
+      expect(check(id: '670000012'), isNotNull);
+      expect(check(id: 'abcdefgh'), isNotNull);
+    });
+
+    test('ชื่อว่าง → ไม่ผ่าน', () {
+      expect(check(name: '   '), isNotNull);
+    });
+
+    test('รหัสผ่านสั้นกว่า 6 ตัว → ไม่ผ่าน', () {
+      expect(check(pass: '12345'), isNotNull);
+      expect(check(pass: '123456'), isNull);
+    });
+  });
+
+  group('ข้อความที่ประตูแสดงผู้ใช้', () {
+    Ticket ticketAt({int hoursLeft = 2, String? slipRef = 'SLIP001'}) => Ticket(
+      code: 'AB3K7Q',
+      studentId: '67000001',
+      studentName: 'นิสิตตัวอย่าง',
+      priceCents: 1000,
+      purchasedAt: DateTime(2026, 10, 20, 13).millisecondsSinceEpoch,
+      expiresAt: DateTime(
+        2026,
+        10,
+        20,
+        20,
+      ).add(Duration(hours: hoursLeft)).millisecondsSinceEpoch,
+      slipRef: slipRef,
+    );
+
+    test('ตั๋วชำระแล้ว → เข้าใช้ได้', () {
+      final shown = GateService.describe(
+        GateAccepted(ticket: ticketAt(), alreadyToday: false),
+      );
+      expect(shown.success, isTrue);
+      expect(shown.title, contains('เข้าใช้ได้'));
+    });
+
+    test('ตั๋วยังไม่ชำระ → ยังไม่ชำระเงิน', () {
+      final shown = GateService.describe(
+        GateRejected(GateFailure.unpaid, ticket: ticketAt(slipRef: null)),
+      );
+      expect(shown.success, isFalse);
+      expect(shown.title, contains('ยังไม่ชำระเงิน'));
+    });
+
+    test('ไม่พบตั๋ว → ไม่พบตั๋วรหัสนี้', () {
+      final shown = GateService.describe(
+        const GateRejected(GateFailure.notFound),
+      );
+      expect(shown.success, isFalse);
+      expect(shown.title, contains('ไม่พบตั๋ว'));
+    });
+
+    test('บันทึกไม่สำเร็จ → บอกผู้ใช้ว่าข้อมูลยังไม่ถูกบันทึก', () {
+      final shown = GateService.describe(
+        const GateRejected(GateFailure.saveFailed, writeFailed: true),
+      );
+      expect(shown.success, isFalse);
+      expect(shown.title, contains('บันทึกการเข้าใช้ไม่สำเร็จ'));
+    });
+
+    test(
+      'id ของบันทึกการเข้าใช้ = 1 คน 1 วัน (เช็คซ้ำได้ด้วยการอ่านรายคีย์เดียว)',
+      () {
+        expect(
+          GateService.entryIdFor('67000001', '2026-10-20'),
+          '67000001_2026-10-20',
+        );
+        expect(
+          GateService.unpaidEntryIdFor('67000001', '2026-10-20'),
+          '67000001_2026-10-20_unpaid',
+        );
+      },
+    );
   });
 
   group('GateService.dateKey', () {
