@@ -11,11 +11,11 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+# โน้ตส่วนตัวของทีม (ไม่ต้องเผยแพร่) — SPEC.md เผยแพร่ เพราะ README ลิงก์ไปหา
 AGENTS.md
 handoff.md
 memory.md
 PROJECT_SUMMARY.md
-SPEC.md
 task.md
 
 
